@@ -191,6 +191,19 @@ The software simulation allows the architecture to be tested, evaluated, and ref
 2. **FPGA prototype** — implement gate logic on programmable hardware
 3. **ASIC evaluation** — map to fixed-function silicon for production latency/power targets
 
+## Benchmarking
+
+Run the gate latency benchmark suite:
+
+```bash
+cd prototype
+python -m gate.benchmark --iterations 10000 --output ../results/benchmark_results.csv
+```
+
+This measures policy loading, gate decision latency (allow and deny), authorization token validation, and replay detection. Results are reported as p50, p95, p99, min, max, and mean in milliseconds.
+
+**Important**: These are software-simulation measurements on a general-purpose CPU, not hardware measurements. Latency targets for FPGA or ASIC implementations will be substantially lower. See [docs/hardware_mapping.md](docs/hardware_mapping.md) for the staged path to hardware.
+
 ## Reproducibility
 
 The artifact can be reproduced with:
@@ -215,6 +228,7 @@ Expected result:
 - [Architecture](docs/architecture.md)
 - [Threat Model](docs/threat_model.md)
 - [Evaluation Plan](docs/evaluation_plan.md)
+- [Hardware Mapping](docs/hardware_mapping.md)
 
 ## License
 

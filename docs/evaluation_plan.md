@@ -2,7 +2,7 @@
 
 ## Objective
 
-Demonstrate that the Actuation Boundary Enforcement Point (ABEP) prototype correctly enforces safety policies, detects attacks, and operates within acceptable latency bounds.
+Demonstrate that the Actuation Boundary Enforcement Point (ABEP) prototype correctly enforces safety policies, detects attacks, operates within acceptable latency bounds, and maintains audit integrity.
 
 ## Metrics
 
@@ -28,7 +28,7 @@ Demonstrate that the Actuation Boundary Enforcement Point (ABEP) prototype corre
 
 **Target**: < 10 ms (software), < 1 ms (hardware target)
 
-**Method**: Measure wall-clock time for `verify_policy()` across 1000 iterations.
+**Method**: Measure wall-clock time for `load_policy()` across configurable iterations using `gate.benchmark`.
 
 ### 4. Gate Decision Latency
 
@@ -36,7 +36,7 @@ Demonstrate that the Actuation Boundary Enforcement Point (ABEP) prototype corre
 
 **Target**: < 1 ms (software), < 100 μs (hardware target)
 
-**Method**: Measure wall-clock time for `evaluate()` across 10,000 action requests with varying policy complexity.
+**Method**: Measure wall-clock time for `evaluate()` across configurable iterations, separately for allowed and denied actions.
 
 ### 5. Authorization Token Validation Latency
 
@@ -44,15 +44,15 @@ Demonstrate that the Actuation Boundary Enforcement Point (ABEP) prototype corre
 
 **Target**: < 1 ms (software), < 50 μs (hardware target)
 
-**Method**: Measure wall-clock time for `validate_token()` across 10,000 tokens.
+**Method**: Measure wall-clock time for `validate_token()` across configurable iterations.
 
-### 6. Replay Detection
+### 6. Replay Detection Latency
 
-**Definition**: Percentage of replayed authorization tokens correctly rejected.
+**Definition**: Time to detect and reject a replayed authorization token.
 
-**Target**: 100%
+**Target**: < 1 ms (software)
 
-**Method**: Issue tokens for allowed actions, then replay each token and verify rejection.
+**Method**: Replay a previously used token and measure rejection time across configurable iterations.
 
 ### 7. Rollback Resistance
 
@@ -70,6 +70,14 @@ Demonstrate that the Actuation Boundary Enforcement Point (ABEP) prototype corre
 
 **Method**: Submit a mixed workload of safe and unsafe actions, then verify every decision appears in the JSONL audit log.
 
+### 9. Audit Chain Integrity
+
+**Definition**: Ability to detect tampering with the audit log via hash chain verification.
+
+**Target**: 100% detection of modified, inserted, or deleted entries
+
+**Method**: Generate an audit log, tamper with individual entries, and verify that `audit_verify.py` detects the break point. The hash chain uses SHA-256 with each entry hashing the canonical content concatenated with the previous entry's hash, starting from a known genesis hash.
+
 ## Test Scenarios
 
 | # | Scenario | Expected | Metric |
@@ -86,14 +94,31 @@ Demonstrate that the Actuation Boundary Enforcement Point (ABEP) prototype corre
 | 10 | Direct actuator bypass | REJECT | Architectural enforcement |
 | 11 | Forged authorization token | REJECT | Token integrity |
 | 12 | Expired authorization token | REJECT | Token freshness |
+| 13 | Tampered audit log entry | DETECTED | Audit chain integrity |
+| 14 | Deleted audit log entry | DETECTED | Audit chain integrity |
 
 ## Benchmarking Protocol
 
-1. Run each latency benchmark in an isolated Python process
-2. Discard the first 100 iterations (warm-up)
-3. Report p50, p95, p99, and max latency
-4. Run on a consistent machine (document CPU, RAM, OS)
-5. Store results in `results/` as CSV for reproducibility
+1. Run benchmarks using `python -m gate.benchmark --iterations N`
+2. The first 100 iterations are discarded as warmup
+3. Report p50, p95, p99, min, max, and mean latency in milliseconds
+4. Run on a consistent machine (document CPU, RAM, OS, Python version)
+5. Store results in `results/benchmark_results.csv`
+
+## Software Simulation vs. Hardware Measurements
+
+All latency numbers produced by `gate.benchmark` are **software-simulation measurements** on a general-purpose CPU running Python. They reflect the algorithmic cost of each operation but do not represent the performance of a hardware implementation.
+
+Hardware targets (see [hardware_mapping.md](hardware_mapping.md)):
+
+| Operation | Software (Python) | MCU target | FPGA target | ASIC target |
+|---|---|---|---|---|
+| Policy verification | ~1 ms | ~10 ms | < 1 ms | < 100 μs |
+| Gate decision | ~0.05 ms | ~1 ms | < 10 μs | < 1 μs |
+| Token validation | ~0.03 ms | ~0.5 ms | < 5 μs | < 1 μs |
+| Replay detection | ~0.01 ms | ~0.1 ms | < 1 μs | < 0.1 μs |
+
+These hardware targets are estimates based on comparable operations in TPM, FPGA, and ASIC literature. Actual measurements will be reported when hardware prototypes are available.
 
 ## Future Hardware Evaluation
 
@@ -104,3 +129,4 @@ When the prototype is mapped to hardware (TPM, FPGA, ASIC):
 - Measure gate throughput (decisions per second)
 - Stress-test replay cache under bounded memory
 - Verify fail-closed behavior under hardware fault injection
+- Verify audit chain integrity under power-loss scenarios

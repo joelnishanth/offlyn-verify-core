@@ -79,7 +79,7 @@ Recent research has already identified important pieces of the problem. RoboGuar
 
 Classical runtime assurance and Simplex-style architectures address the problem of using unverified high-performance controllers in safety-critical systems by monitoring and, when necessary, switching to a trusted controller \cite{simplex2021,nasa2024rta}. Safety filters based on control barrier functions can modify or reject control actions to maintain forward invariance of a safe set \cite{ames2019cbf}. Shielding approaches in reinforcement learning similarly block unsafe actions at runtime based on formal models or abstractions \cite{shields2022}. Jiao addresses mixed-criticality robotics by combining static partitioning, hardware-level override capability, and safety communication layers to preserve isolation in consolidated robot platforms \cite{jiao2026}.
 
-The gap is not absence of safety checking. The gap is the trust placement of the final action authority. Table \ref{tab:related} summarizes the distinction.
+The gap is not absence of safety checking. The gap is the trust placement of the final action authority. Table \ref{tab:related} summarizes the distinction along dimensions most relevant to the actuation-boundary question.
 
 \begin{table*}[t]
 \centering
@@ -98,12 +98,33 @@ EHV \cite{ehv2026} & Hardware-rooted runtime enforcement for general agentic AI 
 Simplex/RTA \cite{simplex2021,nasa2024rta} & Runtime override of unverified controllers & Not LLM-specific & Yes & Varies & Controller authority \\
 CBF/shielding \cite{ames2019cbf,shields2022} & Mathematical safety filters over states and controls & Not LLM-specific & Yes & No & Control input filter \\
 Jiao \cite{jiao2026} & Mixed-criticality partitioning and safety I/O cells & Not LLM-specific & Safety communication & Yes & Control platform I/O \\
-\ovc & Hardware-rooted authorization for AI-originated robotic action requests & Yes & Deterministic policy gate & Yes & Actuation boundary \\
+\ovc & Hardware-rooted authorization for AI-originated robotic action requests & Yes & Deterministic policy gate & Simulated / hardware path & Actuation boundary \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-The proposed contribution is the combination of: (i) AI-originated action requests, (ii) a canonical action authorization interface, (iii) signed policy capsules, (iv) hardware-rooted fail-closed release of actuator-bound commands, and (v) evidence records for each allow or deny outcome. To the best of our current literature scan, this exact systems framing is not yet established as a peer-reviewed robotics paper. The closest research neighbors are ZTPM, SafeGate, ROSClaw, EHV, Simplex/RTA, and Jiao; the proposed design should therefore be presented as an integration and boundary-placement contribution rather than as a claim that policy enforcement or robot safety monitoring is itself novel.
+Table \ref{tab:comparison} provides a finer-grained comparison along the specific defense dimensions that \ovc targets.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Feature-level comparison of related approaches on defense dimensions targeted by \ovc. ``--'' indicates the dimension is not a stated focus of the cited work.}
+\label{tab:comparison}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.7cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2.0cm}>{\centering\arraybackslash}p{2.0cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{1.5cm}}
+\toprule
+Approach & Robot-focused & Enforcement placement & Hardware-rooted boundary & Signed policy capsules & Replay defense & Rollback defense & Open artifact \\
+\midrule
+RoboGuard & Yes & Planner level & No & -- & -- & -- & No \\
+SafeGate & Yes & Pre-execution & No & -- & -- & -- & No \\
+ROSClaw & Yes & ROS middleware & No & -- & -- & -- & Partial \\
+EHV & General & TEE runtime & Yes & Yes & -- & -- & No \\
+RTA / Simplex & Varies & Controller switch & Varies & -- & -- & -- & Varies \\
+\ovc & Yes & Actuation boundary & Simulated / hardware path & Yes & Yes & Yes & Yes \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\ovc is not intended to replace runtime assurance, formal verification, control-theoretic safety filters, or robot middleware guardrails. These systems address complementary layers of the safety stack. Rather, \ovc narrows the final command-release boundary by placing a small, deterministic authorization point between untrusted AI-generated action proposals and actuator execution. The contribution is the combination of: (i) AI-originated action requests, (ii) a canonical action authorization interface, (iii) signed policy capsules with rollback protection, (iv) hardware-rooted fail-closed release of actuator-bound commands with replay defense, and (v) evidence records for each allow or deny outcome, backed by an open reproducible artifact. To the best of our current literature scan, this exact systems framing is not yet established as a peer-reviewed robotics paper. The closest research neighbors are ZTPM, SafeGate, ROSClaw, EHV, Simplex/RTA, and Jiao; the proposed design should therefore be presented as an integration and boundary-placement contribution rather than as a claim that policy enforcement or robot safety monitoring is itself novel.
 
 \section{System Model}
 
