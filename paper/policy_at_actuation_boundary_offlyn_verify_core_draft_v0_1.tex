@@ -70,7 +70,7 @@ This paper makes four contributions:
   \item It defines the \abep abstraction for AI-controlled robots: a mandatory, fail-closed authorization point between AI-generated action requests and physical actuation.
   \item It proposes the \ovc architecture, including signed policy capsules, canonical action requests, freshness checks, actor identity, bounded state predicates, command release semantics, and tamper-evident evidence records.
   \item It distinguishes \ovc from adjacent software guardrails, pre-execution validators, runtime assurance architectures, CBF-based safety filters, and mixed-criticality hardware isolation.
-  \item It provides an evaluation protocol for measuring safety leakage, false rejection, latency overhead, bypass resistance, replay resistance, and audit completeness without overstating unimplemented hardware claims.
+  \item It provides a reproducible open-source artifact demonstrating denial of unsafe commands, replay attempts, rollback attempts, unsigned policy updates, and direct actuator bypass, together with an evaluation protocol for measuring safety leakage, false rejection, latency overhead, bypass resistance, replay resistance, and audit completeness.
 \end{enumerate}
 
 \section{Prior Art and Gap}
@@ -435,6 +435,15 @@ Finally, \ovc suggests a path toward standardization. Robot vendors and labs cou
 AI-controlled robots require safety mechanisms that account for both model-level failures and physical consequences. Software guardrails, task validators, runtime assurance, CBF filters, and mixed-criticality isolation are all important, but none alone answers the systems question of where final physical action authority should reside. This paper proposes \ovc, a hardware-rooted actuation policy gate that mediates AI-originated action requests before they reach safety-relevant actuators or tools.
 
 The core claim is intentionally narrow: placing a small, deterministic, signed-policy enforcement point at the actuation boundary can reduce the trusted computing base for robotic action authorization and improve auditability under software compromise. Future work should implement the gate on real embedded hardware, publish a reproducible benchmark suite, measure latency and bypass resistance, and compare against software-only validators in realistic robot deployments.
+
+\section*{Artifact Availability}
+
+The prototype artifact accompanying this paper is publicly available at:
+\begin{center}
+\texttt{https://github.com/joelnishanth/offlyn-verify-core}
+\end{center}
+
+\noindent The repository includes the draft paper source, signed policy examples, a deterministic Verify Core gate simulator, robot actuator simulators, scenario runners, audit logging, and a pytest suite covering safe actions, unsafe commands, unsigned policy updates, rollback attempts, replay attacks, forged tokens, and direct actuator bypass attempts. All tests and scenarios can be reproduced with standard Python tooling and no external services.
 
 \begin{thebibliography}{99}
 

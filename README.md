@@ -1,5 +1,7 @@
 # Policy at the Actuation Boundary: Hardware-Enforced Safety for AI-Controlled Robots
 
+![tests](https://github.com/joelnishanth/offlyn-verify-core/actions/workflows/tests.yml/badge.svg)
+
 **Offlyn Verify Core** is a research prototype for hardware-enforced safety at the actuation boundary of AI-controlled robots. The system models a small deterministic policy gate placed between an AI planner and robot actuators. The planner may propose actions, but actuators only execute commands that carry a valid, short-lived authorization from the Verify Core gate.
 
 This is not a claim that hardware alone makes robots safe. It is a concrete systems architecture for reducing the trusted computing base of AI-controlled robotic actuation by making the final authorization boundary smaller, auditable, tamper-resistant, and physically harder to bypass.
@@ -188,6 +190,25 @@ The software simulation allows the architecture to be tested, evaluated, and ref
 1. **Software prototype** (this repo) — validate architecture and threat model
 2. **FPGA prototype** — implement gate logic on programmable hardware
 3. **ASIC evaluation** — map to fixed-function silicon for production latency/power targets
+
+## Reproducibility
+
+The artifact can be reproduced with:
+
+```bash
+cd prototype
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pytest -v
+python -m planner.scenarios --scenario all
+```
+
+Expected result:
+
+- All 23 tests pass.
+- Safe movement is allowed.
+- Unsafe speed, angle, geofence, human proximity, unsigned policy, rollback, replay, and direct actuator bypass scenarios fail closed.
 
 ## Documentation
 
