@@ -20,11 +20,7 @@ The prototype in `prototype/` implements the paper's core architecture as a repr
 
 ## Architecture
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/offlyn_verify_core_architecture.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/offlyn_verify_core_architecture.svg">
-  <img alt="Offlyn Verify Core Architecture" src="docs/diagrams/offlyn_verify_core_architecture.svg">
-</picture>
+![Offlyn Verify Core Architecture](docs/diagrams/offlyn_verify_core_architecture.svg)
 
 > [Interactive version (dark/light toggle)](docs/diagrams/architecture.html) — open locally in a browser.
 

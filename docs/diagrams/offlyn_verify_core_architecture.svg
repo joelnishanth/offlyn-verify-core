@@ -1,237 +1,141 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
   <defs>
-    <style>
-      :root, svg {
-        --bg: #020617;
-        --grid: #1e293b;
-        --text: #ffffff;
-        --text-muted: #94a3b8;
-        --text-dim: #475569;
-        --mask: #0f172a;
-        --frontend-fill: rgba(8, 51, 68, 0.4);
-        --frontend-stroke: #22d3ee;
-        --backend-fill: rgba(6, 78, 59, 0.4);
-        --backend-stroke: #34d399;
-        --database-fill: rgba(76, 29, 149, 0.4);
-        --database-stroke: #a78bfa;
-        --cloud-fill: rgba(120, 53, 15, 0.3);
-        --cloud-stroke: #fbbf24;
-        --security-fill: rgba(136, 19, 55, 0.4);
-        --security-stroke: #fb7185;
-        --external-fill: rgba(30, 41, 59, 0.5);
-        --external-stroke: #94a3b8;
-        --region-fill: rgba(251, 191, 36, 0.04);
-        --region-stroke: #fbbf24;
-        --security-group-fill: rgba(251, 113, 133, 0.04);
-        --security-group-stroke: #fb7185;
-        --arrow: #64748b;
-        --arrow-emphasis: #34d399;
-        --arrow-security: #fb7185;
-      }
-
-      @media (prefers-color-scheme: light) {
-        :root, svg {
-          --bg: #f8fafc;
-          --grid: #e2e8f0;
-          --text: #0f172a;
-          --text-muted: #64748b;
-          --text-dim: #94a3b8;
-          --mask: #ffffff;
-          --frontend-fill: rgba(34, 211, 238, 0.15);
-          --frontend-stroke: #0891b2;
-          --backend-fill: rgba(52, 211, 153, 0.18);
-          --backend-stroke: #059669;
-          --database-fill: rgba(167, 139, 250, 0.2);
-          --database-stroke: #7c3aed;
-          --cloud-fill: rgba(251, 191, 36, 0.18);
-          --cloud-stroke: #d97706;
-          --security-fill: rgba(251, 113, 133, 0.15);
-          --security-stroke: #e11d48;
-          --external-fill: rgba(148, 163, 184, 0.18);
-          --external-stroke: #64748b;
-          --region-fill: rgba(251, 191, 36, 0.06);
-          --region-stroke: #d97706;
-          --security-group-fill: rgba(251, 113, 133, 0.06);
-          --security-group-stroke: #e11d48;
-          --arrow: #94a3b8;
-          --arrow-emphasis: #059669;
-          --arrow-security: #e11d48;
-        }
-      }
-
-      .c-bg { fill: var(--bg); }
-      .c-grid { stroke: var(--grid); stroke-width: 0.5; }
-      .c-mask { fill: var(--mask); stroke: none; }
-
-      .c-external { fill: var(--external-fill); stroke: var(--external-stroke); stroke-width: 1.5; }
-      .c-backend { fill: var(--backend-fill); stroke: var(--backend-stroke); stroke-width: 1.5; }
-      .c-database { fill: var(--database-fill); stroke: var(--database-stroke); stroke-width: 1.5; }
-      .c-cloud { fill: var(--cloud-fill); stroke: var(--cloud-stroke); stroke-width: 1.5; }
-      .c-security { fill: var(--security-fill); stroke: var(--security-stroke); stroke-width: 1.5; }
-      .c-region { fill: var(--region-fill); stroke: var(--region-stroke); stroke-width: 1.5; stroke-dasharray: 8 5; }
-      .c-security-group { fill: var(--security-group-fill); stroke: var(--security-group-stroke); stroke-width: 1.5; stroke-dasharray: 10 6; }
-
-      .t-primary { fill: var(--text); font-size: 13px; font-weight: 600; }
-      .t-primary-lg { fill: var(--text); font-size: 15px; font-weight: 700; }
-      .t-muted { fill: var(--text-muted); font-size: 10px; font-weight: 400; }
-      .t-dim { fill: var(--text-dim); font-size: 9px; font-weight: 600; letter-spacing: 0.08em; }
-      .t-label { fill: var(--text-muted); font-size: 9px; font-weight: 500; }
-      .t-label-emphasis { fill: var(--arrow-emphasis); font-size: 9px; font-weight: 600; }
-      .t-label-security { fill: var(--arrow-security); font-size: 9px; font-weight: 600; }
-      .t-blocked { fill: var(--arrow-security); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; }
-      .t-title { fill: var(--text); font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
-      .t-subtitle { fill: var(--text-muted); font-size: 11px; font-weight: 400; }
-
-      .a-default { fill: none; stroke: var(--arrow); stroke-width: 1.5; }
-      .a-emphasis { fill: none; stroke: var(--arrow-emphasis); stroke-width: 1.5; }
-      .a-security { fill: none; stroke: var(--arrow-security); stroke-width: 1.5; stroke-dasharray: 6 4; }
-
-      .m-default { fill: var(--arrow); }
-      .m-emphasis { fill: var(--arrow-emphasis); }
-      .m-security { fill: var(--arrow-security); }
-      .x-mark { fill: none; stroke: var(--arrow-security); stroke-width: 2.5; stroke-linecap: round; }
-
-      .legend-dot { stroke-width: 1.5; }
-      .legend-text { fill: var(--text-muted); font-size: 9px; font-weight: 500; }
-    </style>
-
     <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-      <line class="c-grid" x1="0" y1="0" x2="20" y2="0"/>
-      <line class="c-grid" x1="0" y1="0" x2="0" y2="20"/>
+      <line x1="0" y1="0" x2="20" y2="0" stroke="#1e293b" stroke-width="0.5"/>
+      <line x1="0" y1="0" x2="0" y2="20" stroke="#1e293b" stroke-width="0.5"/>
     </pattern>
-
-    <marker id="arr-d" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path class="m-default" d="M0,0 L8,4 L0,8 Z"/>
+    <marker id="ad" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#64748b"/>
     </marker>
-    <marker id="arr-e" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path class="m-emphasis" d="M0,0 L8,4 L0,8 Z"/>
+    <marker id="ae" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#34d399"/>
     </marker>
-    <marker id="arr-s" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path class="m-security" d="M0,0 L8,4 L0,8 Z"/>
+    <marker id="as" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#fb7185"/>
     </marker>
   </defs>
 
   <!-- Background -->
-  <rect class="c-bg" width="960" height="680"/>
+  <rect width="960" height="680" fill="#020617"/>
   <rect width="960" height="680" fill="url(#grid)"/>
 
   <!-- Title -->
-  <text class="t-title" x="480" y="36" text-anchor="middle">Offlyn Verify Core Architecture</text>
-  <text class="t-subtitle" x="480" y="54" text-anchor="middle">Hardware-rooted actuation-boundary enforcement for AI-controlled robots</text>
+  <text x="480" y="36" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="700" letter-spacing="-0.02em">Offlyn Verify Core Architecture</text>
+  <text x="480" y="54" text-anchor="middle" fill="#94a3b8" font-size="11">Hardware-rooted actuation-boundary enforcement for AI-controlled robots</text>
 
-  <!-- Domain boundaries -->
-  <rect class="c-region" x="268" y="72" width="424" height="108" rx="8"/>
-  <text class="t-dim" x="282" y="88">UNTRUSTED DOMAIN</text>
+  <!-- Domain: Untrusted -->
+  <rect x="268" y="72" width="424" height="108" rx="8" fill="rgba(251,191,36,0.04)" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="8 5"/>
+  <text x="282" y="88" fill="#475569" font-size="9" font-weight="600" letter-spacing="0.08em">UNTRUSTED DOMAIN</text>
 
-  <rect class="c-region" x="268" y="528" width="424" height="108" rx="8"/>
-  <text class="t-dim" x="282" y="544">TRUSTED DOMAIN</text>
+  <!-- Domain: Trusted -->
+  <rect x="268" y="528" width="424" height="108" rx="8" fill="rgba(251,191,36,0.04)" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="8 5"/>
+  <text x="282" y="544" fill="#475569" font-size="9" font-weight="600" letter-spacing="0.08em">TRUSTED DOMAIN</text>
 
-  <rect class="c-security-group" x="42" y="198" width="876" height="318" rx="10"/>
-  <text class="t-dim" x="56" y="216">ACTUATION BOUNDARY (ABEP)</text>
+  <!-- Boundary: ABEP -->
+  <rect x="42" y="198" width="876" height="318" rx="10" fill="rgba(251,113,133,0.04)" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="10 6"/>
+  <text x="56" y="216" fill="#475569" font-size="9" font-weight="600" letter-spacing="0.08em">ACTUATION BOUNDARY (ABEP)</text>
 
-  <!-- Arrows (drawn before components, masked by c-mask rects) -->
+  <!-- Arrows (drawn before components so masks hide them) -->
 
   <!-- AI Planner ? Verify Core Gate -->
-  <path class="a-default" d="M 480 153 L 480 278" marker-end="url(#arr-d)"/>
-  <text class="t-label" x="488" y="218">action request</text>
+  <path d="M 480 153 L 480 278" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#ad)"/>
+  <text x="488" y="218" fill="#94a3b8" font-size="9" font-weight="500">action request</text>
 
   <!-- Signed Policy ? Verify Core Gate -->
-  <path class="a-emphasis" d="M 262 339 L 328 324" marker-end="url(#arr-e)"/>
-  <text class="t-label-emphasis" x="268" y="318">signed rules</text>
+  <path d="M 262 339 L 328 324" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#ae)"/>
+  <text x="268" y="318" fill="#34d399" font-size="9" font-weight="600">signed rules</text>
 
   <!-- Verify Core Gate ? Replay Cache -->
-  <path class="a-default" d="M 632 308 L 718 251" marker-end="url(#arr-d)"/>
+  <path d="M 632 308 L 718 251" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#ad)"/>
 
   <!-- Verify Core Gate ? Audit Log -->
-  <path class="a-default" d="M 632 340 L 718 396" marker-end="url(#arr-d)"/>
+  <path d="M 632 340 L 718 396" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#ad)"/>
 
   <!-- Verify Core Gate ? Auth Token (ALLOW) -->
-  <path class="a-emphasis" d="M 480 370 L 480 443" marker-end="url(#arr-e)"/>
-  <text class="t-label-emphasis" x="488" y="408">ALLOW</text>
+  <path d="M 480 370 L 480 443" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#ae)"/>
+  <text x="488" y="408" fill="#34d399" font-size="9" font-weight="600">ALLOW</text>
 
   <!-- Auth Token ? Robot Actuator -->
-  <path class="a-emphasis" d="M 480 493 L 480 553" marker-end="url(#arr-e)"/>
-  <text class="t-label-emphasis" x="488" y="526">authorized command</text>
+  <path d="M 480 493 L 480 553" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#ae)"/>
+  <text x="488" y="526" fill="#34d399" font-size="9" font-weight="600">authorized command</text>
 
   <!-- Verify Core Gate ? AI Planner (DENY) -->
-  <path class="a-security" d="M 350 282 Q 280 230 380 153" marker-end="url(#arr-s)"/>
-  <text class="t-label-security" x="288" y="208">DENY + reason</text>
+  <path d="M 350 282 Q 280 230 380 153" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#as)"/>
+  <text x="288" y="208" fill="#fb7185" font-size="9" font-weight="600">DENY + reason</text>
 
-  <!-- AI Planner 렁� Robot Actuator (blocked bypass) -->
-  <path class="a-security" d="M 614 126 Q 830 290 640 538" stroke-dasharray="6 4"/>
-  <line class="x-mark" x1="730" y1="340" x2="746" y2="356"/>
-  <line class="x-mark" x1="746" y1="340" x2="730" y2="356"/>
-  <text class="t-blocked" x="752" y="352">BLOCKED</text>
+  <!-- AI Planner ? Robot Actuator (blocked bypass) -->
+  <path d="M 614 126 Q 830 290 640 538" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <line x1="730" y1="340" x2="746" y2="356" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <line x1="746" y1="340" x2="730" y2="356" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <text x="752" y="352" fill="#fb7185" font-size="10" font-weight="700" letter-spacing="0.08em">BLOCKED</text>
 
   <!-- Components -->
 
   <!-- AI Planner / LLM -->
-  <rect class="c-mask" x="348" y="94" width="264" height="58" rx="6"/>
-  <rect class="c-external" x="348" y="94" width="264" height="58" rx="6"/>
-  <text class="t-primary" x="480" y="118" text-anchor="middle">AI Planner / LLM</text>
-  <text class="t-muted" x="480" y="136" text-anchor="middle">Proposes robot actions</text>
+  <rect x="348" y="94" width="264" height="58" rx="6" fill="#0f172a"/>
+  <rect x="348" y="94" width="264" height="58" rx="6" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="480" y="118" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">AI Planner / LLM</text>
+  <text x="480" y="136" text-anchor="middle" fill="#94a3b8" font-size="10">Proposes robot actions</text>
 
   <!-- Signed Policy Capsule -->
-  <rect class="c-mask" x="68" y="310" width="194" height="58" rx="6"/>
-  <rect class="c-backend" x="68" y="310" width="194" height="58" rx="6"/>
-  <text class="t-primary" x="165" y="334" text-anchor="middle">Signed Policy</text>
-  <text class="t-muted" x="165" y="352" text-anchor="middle">Ed25519 capsule</text>
+  <rect x="68" y="310" width="194" height="58" rx="6" fill="#0f172a"/>
+  <rect x="68" y="310" width="194" height="58" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="165" y="334" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Signed Policy</text>
+  <text x="165" y="352" text-anchor="middle" fill="#94a3b8" font-size="10">Ed25519 capsule</text>
 
   <!-- Verify Core Gate -->
-  <rect class="c-mask" x="328" y="278" width="304" height="92" rx="6"/>
-  <rect class="c-security" x="328" y="278" width="304" height="92" rx="6"/>
-  <text class="t-primary-lg" x="480" y="312" text-anchor="middle">Verify Core Gate</text>
-  <text class="t-muted" x="480" y="332" text-anchor="middle">Deterministic � Fail-closed</text>
-  <text class="t-muted" x="480" y="348" text-anchor="middle">Signed policy � Bounds � Replay cache</text>
+  <rect x="328" y="278" width="304" height="92" rx="6" fill="#0f172a"/>
+  <rect x="328" y="278" width="304" height="92" rx="6" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+  <text x="480" y="312" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">Verify Core Gate</text>
+  <text x="480" y="332" text-anchor="middle" fill="#94a3b8" font-size="10">Deterministic � Fail-closed</text>
+  <text x="480" y="348" text-anchor="middle" fill="#94a3b8" font-size="10">Signed policy � Bounds � Replay cache</text>
 
   <!-- Replay Cache -->
-  <rect class="c-mask" x="718" y="225" width="182" height="52" rx="6"/>
-  <rect class="c-database" x="718" y="225" width="182" height="52" rx="6"/>
-  <text class="t-primary" x="809" y="246" text-anchor="middle">Replay Cache</text>
-  <text class="t-muted" x="809" y="262" text-anchor="middle">Token reuse prevention</text>
+  <rect x="718" y="225" width="182" height="52" rx="6" fill="#0f172a"/>
+  <rect x="718" y="225" width="182" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="809" y="246" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Replay Cache</text>
+  <text x="809" y="262" text-anchor="middle" fill="#94a3b8" font-size="10">Token reuse prevention</text>
 
   <!-- Audit Log -->
-  <rect class="c-mask" x="718" y="370" width="182" height="52" rx="6"/>
-  <rect class="c-database" x="718" y="370" width="182" height="52" rx="6"/>
-  <text class="t-primary" x="809" y="391" text-anchor="middle">Audit Log</text>
-  <text class="t-muted" x="809" y="407" text-anchor="middle">Hash-chained JSONL</text>
+  <rect x="718" y="370" width="182" height="52" rx="6" fill="#0f172a"/>
+  <rect x="718" y="370" width="182" height="52" rx="6" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="809" y="391" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Audit Log</text>
+  <text x="809" y="407" text-anchor="middle" fill="#94a3b8" font-size="10">Hash-chained JSONL</text>
 
   <!-- Authorization Token -->
-  <rect class="c-mask" x="405" y="443" width="150" height="50" rx="6"/>
-  <rect class="c-cloud" x="405" y="443" width="150" height="50" rx="6"/>
-  <text class="t-primary" x="480" y="464" text-anchor="middle">Auth Token</text>
-  <text class="t-muted" x="480" y="480" text-anchor="middle">Short-lived, action-bound</text>
+  <rect x="405" y="443" width="150" height="50" rx="6" fill="#0f172a"/>
+  <rect x="405" y="443" width="150" height="50" rx="6" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="480" y="464" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Auth Token</text>
+  <text x="480" y="480" text-anchor="middle" fill="#94a3b8" font-size="10">Short-lived, action-bound</text>
 
   <!-- Robot Actuator -->
-  <rect class="c-mask" x="348" y="553" width="264" height="58" rx="6"/>
-  <rect class="c-backend" x="348" y="553" width="264" height="58" rx="6"/>
-  <text class="t-primary" x="480" y="577" text-anchor="middle">Robot Actuator</text>
-  <text class="t-muted" x="480" y="595" text-anchor="middle">Validates token before executing</text>
+  <rect x="348" y="553" width="264" height="58" rx="6" fill="#0f172a"/>
+  <rect x="348" y="553" width="264" height="58" rx="6" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="480" y="577" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Robot Actuator</text>
+  <text x="480" y="595" text-anchor="middle" fill="#94a3b8" font-size="10">Validates token before executing</text>
 
   <!-- Legend -->
-  <g transform="translate(80, 645)">
-    <rect class="c-external" x="0" y="-8" width="12" height="12" rx="2"/>
-    <text class="legend-text" x="18" y="2">External</text>
+  <rect x="80" y="635" width="12" height="12" rx="2" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="98" y="645" fill="#94a3b8" font-size="9" font-weight="500">External</text>
 
-    <rect class="c-security" x="90" y="-8" width="12" height="12" rx="2"/>
-    <text class="legend-text" x="108" y="2">Security Gate</text>
+  <rect x="170" y="635" width="12" height="12" rx="2" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+  <text x="188" y="645" fill="#94a3b8" font-size="9" font-weight="500">Security Gate</text>
 
-    <rect class="c-backend" x="210" y="-8" width="12" height="12" rx="2"/>
-    <text class="legend-text" x="228" y="2">Trusted Component</text>
+  <rect x="290" y="635" width="12" height="12" rx="2" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+  <text x="308" y="645" fill="#94a3b8" font-size="9" font-weight="500">Trusted Component</text>
 
-    <rect class="c-database" x="370" y="-8" width="12" height="12" rx="2"/>
-    <text class="legend-text" x="388" y="2">Data Store</text>
+  <rect x="440" y="635" width="12" height="12" rx="2" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="458" y="645" fill="#94a3b8" font-size="9" font-weight="500">Data Store</text>
 
-    <rect class="c-cloud" x="470" y="-8" width="12" height="12" rx="2"/>
-    <text class="legend-text" x="488" y="2">Token</text>
+  <rect x="550" y="635" width="12" height="12" rx="2" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="568" y="645" fill="#94a3b8" font-size="9" font-weight="500">Token</text>
 
-    <line class="a-emphasis" x1="546" y1="-2" x2="576" y2="-2" marker-end="url(#arr-e)"/>
-    <text class="legend-text" x="582" y="2">Allow Path</text>
+  <line x1="626" y1="641" x2="656" y2="641" stroke="#34d399" stroke-width="1.5" marker-end="url(#ae)"/>
+  <text x="662" y="645" fill="#94a3b8" font-size="9" font-weight="500">Allow Path</text>
 
-    <line class="a-security" x1="660" y1="-2" x2="690" y2="-2" marker-end="url(#arr-s)"/>
-    <text class="legend-text" x="696" y="2">Deny / Blocked</text>
-  </g>
+  <line x1="740" y1="641" x2="770" y2="641" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#as)"/>
+  <text x="776" y="645" fill="#94a3b8" font-size="9" font-weight="500">Deny / Blocked</text>
 
   <!-- Footer -->
-  <text class="t-subtitle" x="480" y="674" text-anchor="middle">offlyn.ai � github.com/joelnishanth/offlyn-verify-core</text>
+  <text x="480" y="674" text-anchor="middle" fill="#94a3b8" font-size="10">offlyn.ai � github.com/joelnishanth/offlyn-verify-core</text>
 </svg>
