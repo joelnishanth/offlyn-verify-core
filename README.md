@@ -1,8 +1,8 @@
-# Policy at the Actuation Boundary: Hardware-Enforced Safety for AI-Controlled Robots
+# Policy at the Actuation Boundary: Hardware-Rooted Safety Enforcement for AI-Controlled Robots
 
 ![tests](https://github.com/joelnishanth/offlyn-verify-core/actions/workflows/tests.yml/badge.svg)
 
-**Offlyn Verify Core** is a research prototype for hardware-enforced safety at the actuation boundary of AI-controlled robots. The system models a small deterministic policy gate placed between an AI planner and robot actuators. The planner may propose actions, but actuators only execute commands that carry a valid, short-lived authorization from the Verify Core gate.
+**Offlyn Verify Core** is a research prototype for hardware-rooted safety enforcement at the actuation boundary of AI-controlled robots. The system models a small deterministic policy gate placed between an AI planner and robot actuators. The planner may propose actions, but actuators only execute commands that carry a valid, short-lived authorization from the Verify Core gate.
 
 This is not a claim that hardware alone makes robots safe. It is a concrete systems architecture for reducing the trusted computing base of AI-controlled robotic actuation by making the final authorization boundary smaller, auditable, tamper-resistant, and physically harder to bypass.
 
@@ -10,10 +10,11 @@ This is not a claim that hardware alone makes robots safe. It is a concrete syst
 
 This repository accompanies the draft paper:
 
-**Policy at the Actuation Boundary: Hardware-Enforced Safety for AI-Controlled Robots**
+**Policy at the Actuation Boundary: Hardware-Rooted Safety Enforcement for AI-Controlled Robots**
 
 - [PDF draft](paper/policy_at_actuation_boundary_offlyn_verify_core_draft_v0_1.pdf)
 - [LaTeX source](paper/policy_at_actuation_boundary_offlyn_verify_core_draft_v0_1.tex)
+- [v0.1 artifact release](https://github.com/joelnishanth/offlyn-verify-core/releases/tag/v0.1-paper-artifact)
 
 The prototype in `prototype/` implements the paper's core architecture as a reproducible software simulation of a hardware-rooted actuation-boundary enforcement point.
 

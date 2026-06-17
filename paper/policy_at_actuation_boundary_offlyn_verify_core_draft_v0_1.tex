@@ -29,9 +29,9 @@
     columns=fullflexible
 }
 
-\title{Policy at the Actuation Boundary:\\Hardware-Enforced Safety for AI-Controlled Robots}
+\title{Policy at the Actuation Boundary:\\Hardware-Rooted Safety Enforcement for AI-Controlled Robots}
 \author{Author Name(s)\\Offlyn Verify Core Project\\\texttt{author@example.com}}
-\date{Draft v0.1 -- June 16, 2026}
+\date{Draft v0.2 -- June 17, 2026}
 
 \begin{document}
 \maketitle
@@ -39,7 +39,7 @@
 \begin{abstract}
 Large foundation models and agentic planners are increasingly being connected to robots, drones, industrial manipulators, and other cyber-physical systems. This creates a new safety problem: a model may propose an unsafe action, a compromised software stack may bypass a software guardrail, or a benign task may become physically unsafe when translated into concrete actuation parameters. Existing safeguards for LLM-enabled robots include prompt-level constraints, pre-execution validators, temporal-logic planners, runtime assurance frameworks, safety filters, and ROS-level middleware. These approaches are valuable, but many remain inside the same software trust domain as the planner, executor, operating system, or middleware they are intended to constrain.
 
-This paper proposes \ovc, a hardware-rooted policy gate placed at the actuation boundary between the autonomy stack and the physical command path. The key idea is to move final action authorization into a small, deterministic, separately controlled enforcement point that releases actuator-bound commands only after checking signed policy capsules, actor identity, command schema, physical bounds, freshness, and selected state predicates. We define the \abep abstraction, an action authorization interface, fail-closed enforcement semantics, and an evidence model for allow and deny decisions. The paper positions \ovc relative to recent work on LLM robot guardrails, pre-execution safety gates, zero-trust policy models for agentic cyber-physical systems, runtime assurance, control barrier functions, and mixed-criticality robotics. The contribution is not a claim that hardware alone makes robots safe. Rather, it is a concrete systems architecture for reducing the trusted computing base of AI-controlled robotic actuation by making the final authorization boundary smaller, auditable, tamper-resistant, and physically harder to bypass.
+This paper proposes \ovc, a hardware-rooted policy gate placed at the actuation boundary between the autonomy stack and the physical command path. The key idea is to move final action authorization into a small, deterministic, separately controlled enforcement point that releases actuator-bound commands only after checking signed policy capsules, actor identity, command schema, physical bounds, freshness, and selected state predicates. We define the \abep abstraction, an action authorization interface, fail-closed enforcement semantics, and an evidence model for allow and deny decisions. The paper positions \ovc relative to recent work on LLM robot guardrails, pre-execution safety gates, zero-trust policy models for agentic cyber-physical systems, runtime assurance, control barrier functions, and mixed-criticality robotics. The contribution is not a claim that hardware alone makes robots safe. Rather, it is a concrete systems architecture for reducing the trusted computing base of AI-controlled robotic actuation by making the final authorization boundary smaller, auditable, tamper-resistant, and physically harder to bypass. The current artifact is a reproducible software prototype that validates the architecture, interfaces, and defense properties; hardware implementation is a staged future path from TPM-backed signing to microcontroller, FPGA, and ASIC enforcement.
 \end{abstract}
 
 \section{Introduction}
@@ -433,12 +433,15 @@ The first paper can report an emulated or development-board prototype. A later p
 \ovc has important limitations:
 
 \begin{itemize}[leftmargin=*]
+  \item \textbf{Software prototype}: the current implementation is a software simulation of the proposed architecture. It does not yet include a physical microcontroller, TPM-backed attestation path, FPGA design, or ASIC primitive. The reported latency measurements characterize the prototype software path rather than a hardware enforcement boundary.
+  \item \textbf{Structured action scope}: the prototype evaluates structured canonical action requests rather than raw motor-control signals, trajectory streams, or full ROS~2 action graphs. This is intentional for the initial artifact: the goal is to isolate and test the command-release interface, signed policy capsule flow, replay defenses, rollback protection, and fail-closed actuator behavior. Future work should integrate the gate with ROS~2, evaluate physical actuator mediation through a microcontroller, and compare enforcement latency against existing runtime assurance and robot middleware guardrail approaches.
   \item \textbf{Policy correctness}: a hardware gate faithfully enforcing a bad policy can still permit unsafe behavior.
   \item \textbf{State observability}: dynamic predicates are only as reliable as the sensors and trust boundary that supply them.
   \item \textbf{Expressiveness}: a small gate should not run arbitrary planners or high-dimensional optimization. This limits what it can decide locally.
   \item \textbf{Integration complexity}: industrial robots use diverse buses, controllers, safety systems, and certification requirements.
   \item \textbf{Bypass by rewiring}: physical attackers may bypass a gate unless the system is mechanically and electrically designed to prevent it or detect it.
   \item \textbf{Certification}: hardware-rooted policy enforcement is not equivalent to compliance with functional safety standards.
+  \item \textbf{Complementarity}: \ovc does not replace formal verification, control-theoretic safety filters, runtime assurance, secure robot middleware, or human supervisory controls. It is intended as a narrow final authorization boundary for AI-generated action proposals before actuator execution.
 \end{itemize}
 
 These limitations are compatible with the paper's thesis. The goal is not to make a robot safe by adding a single box. The goal is to make final AI-originated action authorization smaller, more deterministic, more auditable, and harder for the AI runtime to override.
@@ -459,12 +462,12 @@ The core claim is intentionally narrow: placing a small, deterministic, signed-p
 
 \section*{Artifact Availability}
 
-The prototype artifact accompanying this paper is publicly available at:
+The \ovc v0.1 artifact is publicly available at:
 \begin{center}
-\texttt{https://github.com/joelnishanth/offlyn-verify-core}
+\url{https://github.com/joelnishanth/offlyn-verify-core/releases/tag/v0.1-paper-artifact}
 \end{center}
 
-\noindent The repository includes the draft paper source, signed policy examples, a deterministic Verify Core gate simulator, robot actuator simulators, scenario runners, audit logging, and a pytest suite covering safe actions, unsafe commands, unsigned policy updates, rollback attempts, replay attacks, forged tokens, and direct actuator bypass attempts. All tests and scenarios can be reproduced with standard Python tooling and no external services.
+\noindent The artifact includes the paper source, reproducible Python prototype, signed policy capsule flow, deterministic Verify Core gate simulator, actuator simulators, scenario runner, tamper-evident audit-log hash chaining, replay and rollback tests, benchmark scripts, sample benchmark results, and documentation for the staged path from software simulation to TPM, microcontroller, FPGA, and ASIC implementations. All latency measurements reported in this paper are software-simulation measurements and should not be interpreted as hardware performance claims. All tests and scenarios can be reproduced with standard Python tooling and no external services.
 
 \begin{thebibliography}{99}
 
