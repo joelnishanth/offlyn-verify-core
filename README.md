@@ -20,31 +20,13 @@ The prototype in `prototype/` implements the paper's core architecture as a repr
 
 ## Architecture
 
-```mermaid
-graph TB
-    subgraph "Untrusted Domain"
-        PLANNER["AI Planner<br/>(LLM / Agentic System)"]
-    end
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/offlyn_verify_core_architecture.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/offlyn_verify_core_architecture.svg">
+  <img alt="Offlyn Verify Core Architecture" src="docs/diagrams/offlyn_verify_core_architecture.svg">
+</picture>
 
-    subgraph "Actuation Boundary"
-        GATE["Verify Core Gate<br/>(ABEP)"]
-        POLICY["Signed Policy<br/>Capsule"]
-        REPLAY["Replay Cache"]
-        AUDIT["Audit Log<br/>(append-only)"]
-    end
-
-    subgraph "Trusted Domain"
-        ACTUATOR["Robot Actuator"]
-    end
-
-    PLANNER -->|"action request"| GATE
-    POLICY -->|"signed rules"| GATE
-    GATE -->|"ALLOW + auth token"| ACTUATOR
-    GATE -->|"DENY"| PLANNER
-    GATE --> REPLAY
-    GATE --> AUDIT
-    PLANNER -.->|"❌ direct bypass blocked"| ACTUATOR
-```
+> [Interactive version (dark/light toggle)](docs/diagrams/architecture.html) — open locally in a browser.
 
 **Key idea**: The AI planner proposes robot actions, but it must not talk directly to the actuator. Every action passes through a small deterministic **Verify Core gate**. The gate checks signed policy capsules, evaluates physical bounds, issues short-lived authorization tokens, and logs every decision. The actuator refuses commands without a valid gate-issued token.
 

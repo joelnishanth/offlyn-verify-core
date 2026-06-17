@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offlyn Verify Core Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    [data-theme="dark"] {
+      --bg: #020617;
+      --grid: #1e293b;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --mask: #0f172a;
+      --panel-bg: rgba(15, 23, 42, 0.5);
+      --panel-border: #1e293b;
+      --card-bg: rgba(15, 23, 42, 0.6);
+      --card-border: #1e293b;
+      --toolbar-bg: rgba(15, 23, 42, 0.85);
+      --toolbar-border: #1e293b;
+      --pulse: #34d399;
+      --frontend-stroke: #22d3ee;
+      --frontend-fill: rgba(8, 51, 68, 0.4);
+      --backend-stroke: #34d399;
+      --backend-fill: rgba(6, 78, 59, 0.4);
+      --database-stroke: #a78bfa;
+      --database-fill: rgba(76, 29, 149, 0.4);
+      --cloud-stroke: #fbbf24;
+      --cloud-fill: rgba(120, 53, 15, 0.3);
+      --security-stroke: #fb7185;
+      --security-fill: rgba(136, 19, 55, 0.4);
+      --messagebus-stroke: #fb923c;
+      --messagebus-fill: rgba(251, 146, 60, 0.3);
+      --external-stroke: #94a3b8;
+      --external-fill: rgba(30, 41, 59, 0.5);
+      --region-stroke: #fbbf24;
+      --region-fill: rgba(251, 191, 36, 0.04);
+      --security-group-stroke: #fb7185;
+      --security-group-fill: rgba(251, 113, 133, 0.04);
+      --arrow-default: #64748b;
+      --arrow-emphasis: #34d399;
+      --arrow-security: #fb7185;
+      --dot-rose: #fb7185;
+      --dot-violet: #a78bfa;
+      --dot-emerald: #34d399;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --grid: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --mask: #ffffff;
+      --panel-bg: #ffffff;
+      --panel-border: #e2e8f0;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --toolbar-bg: rgba(255, 255, 255, 0.92);
+      --toolbar-border: #e2e8f0;
+      --pulse: #059669;
+      --frontend-stroke: #0891b2;
+      --frontend-fill: rgba(34, 211, 238, 0.15);
+      --backend-stroke: #059669;
+      --backend-fill: rgba(52, 211, 153, 0.18);
+      --database-stroke: #7c3aed;
+      --database-fill: rgba(167, 139, 250, 0.2);
+      --cloud-stroke: #d97706;
+      --cloud-fill: rgba(251, 191, 36, 0.18);
+      --security-stroke: #e11d48;
+      --security-fill: rgba(251, 113, 133, 0.15);
+      --messagebus-stroke: #ea580c;
+      --messagebus-fill: rgba(251, 146, 60, 0.15);
+      --external-stroke: #64748b;
+      --external-fill: rgba(148, 163, 184, 0.18);
+      --region-stroke: #d97706;
+      --region-fill: rgba(251, 191, 36, 0.06);
+      --security-group-stroke: #e11d48;
+      --security-group-fill: rgba(251, 113, 133, 0.06);
+      --arrow-default: #94a3b8;
+      --arrow-emphasis: #059669;
+      --arrow-security: #e11d48;
+      --dot-rose: #e11d48;
+      --dot-violet: #7c3aed;
+      --dot-emerald: #059669;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .toolbar {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 100;
+    }
+
+    .toolbar button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--toolbar-border);
+      background: var(--toolbar-bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .toolbar button:hover {
+      border-color: var(--text-muted);
+    }
+
+    .toolbar #theme-icon {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 48px 24px 32px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--pulse);
+      box-shadow: 0 0 0 0 var(--pulse);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+    }
+
+    [data-theme="light"] .pulse-dot {
+      animation-name: pulse-light;
+    }
+
+    @keyframes pulse-light {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(5, 150, 105, 0); }
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 400;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .diagram-container {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .diagram-container svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* SVG grid */
+    .c-grid line {
+      stroke: var(--grid);
+      stroke-width: 1;
+    }
+
+    /* Component masks */
+    .c-mask {
+      fill: var(--mask);
+      stroke: none;
+    }
+
+    /* Semantic components */
+    .c-frontend, .c-backend, .c-database, .c-cloud, .c-security, .c-messagebus, .c-external {
+      fill: var(--comp-fill);
+      stroke: var(--comp-stroke);
+      stroke-width: 1.5;
+    }
+
+    .c-frontend { --comp-stroke: var(--frontend-stroke); --comp-fill: var(--frontend-fill); }
+    .c-backend { --comp-stroke: var(--backend-stroke); --comp-fill: var(--backend-fill); }
+    .c-database { --comp-stroke: var(--database-stroke); --comp-fill: var(--database-fill); }
+    .c-cloud { --comp-stroke: var(--cloud-stroke); --comp-fill: var(--cloud-fill); }
+    .c-security { --comp-stroke: var(--security-stroke); --comp-fill: var(--security-fill); }
+    .c-messagebus { --comp-stroke: var(--messagebus-stroke); --comp-fill: var(--messagebus-fill); }
+    .c-external { --comp-stroke: var(--external-stroke); --comp-fill: var(--external-fill); }
+
+    /* Boundaries */
+    .c-region {
+      fill: var(--region-fill);
+      stroke: var(--region-stroke);
+      stroke-width: 1.5;
+      stroke-dasharray: 8 5;
+    }
+
+    .c-security-group {
+      fill: var(--security-group-fill);
+      stroke: var(--security-group-stroke);
+      stroke-width: 1.5;
+      stroke-dasharray: 10 6;
+    }
+
+    .t-primary {
+      fill: var(--text);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .t-primary-lg {
+      fill: var(--text);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .t-muted {
+      fill: var(--text-muted);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .t-dim {
+      fill: var(--text-dim);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .t-label {
+      fill: var(--text-muted);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 9px;
+      font-weight: 500;
+    }
+
+    .t-label-emphasis {
+      fill: var(--arrow-emphasis);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .t-label-security {
+      fill: var(--arrow-security);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .t-blocked {
+      fill: var(--arrow-security);
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    /* Arrows */
+    .a-default {
+      fill: none;
+      stroke: var(--arrow-default);
+      stroke-width: 1.5;
+      marker-end: url(#arrow-default);
+    }
+
+    .a-emphasis {
+      fill: none;
+      stroke: var(--arrow-emphasis);
+      stroke-width: 1.5;
+      marker-end: url(#arrow-emphasis);
+    }
+
+    .a-security {
+      fill: none;
+      stroke: var(--arrow-security);
+      stroke-width: 1.5;
+      stroke-dasharray: 6 4;
+      marker-end: url(#arrow-security);
+    }
+
+    .a-security-blocked {
+      fill: none;
+      stroke: var(--arrow-security);
+      stroke-width: 1.5;
+      stroke-dasharray: 6 4;
+    }
+
+    .m-default { fill: var(--arrow-default); }
+    .m-emphasis { fill: var(--arrow-emphasis); }
+    .m-security { fill: var(--arrow-security); }
+
+    .x-mark {
+      fill: none;
+      stroke: var(--arrow-security);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    /* Summary cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 860px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .card-dot.rose { background: var(--dot-rose); }
+    .card-dot.violet { background: var(--dot-violet); }
+    .card-dot.emerald { background: var(--dot-emerald); }
+
+    .card h3 {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card li {
+      font-size: 11px;
+      color: var(--text-muted);
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .card li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--text-dim);
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--panel-border);
+    }
+
+    .footer kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel-bg);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 10px;
+      margin: 0 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button id="btn-theme" type="button" aria-label="Toggle theme">
+      <span id="theme-icon">☾</span>
+      <span id="theme-label">Dark</span>
+    </button>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-title-row">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <h1>Offlyn Verify Core Architecture</h1>
+      </div>
+      <p>Hardware-rooted actuation-boundary enforcement for AI-controlled robots</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 960 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Offlyn Verify Core architecture diagram">
+        <defs>
+          <!-- Grid pattern -->
+          <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+            <line class="c-grid" x1="0" y1="0" x2="20" y2="0"/>
+            <line class="c-grid" x1="0" y1="0" x2="0" y2="20"/>
+          </pattern>
+
+          <!-- Arrow markers -->
+          <marker id="arrow-default" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path class="m-default" d="M0,0 L8,4 L0,8 Z"/>
+          </marker>
+          <marker id="arrow-emphasis" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path class="m-emphasis" d="M0,0 L8,4 L0,8 Z"/>
+          </marker>
+          <marker id="arrow-security" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path class="m-security" d="M0,0 L8,4 L0,8 Z"/>
+          </marker>
+        </defs>
+
+        <!-- Background grid -->
+        <rect width="960" height="620" fill="url(#grid-pattern)"/>
+
+        <!-- Domain boundaries (behind arrows) -->
+        <rect class="c-region" x="268" y="22" width="424" height="108" rx="8"/>
+        <text class="t-dim" x="282" y="38">Untrusted Domain</text>
+
+        <rect class="c-region" x="268" y="478" width="424" height="108" rx="8"/>
+        <text class="t-dim" x="282" y="494">Trusted Domain</text>
+
+        <rect class="c-security-group" x="42" y="148" width="876" height="318" rx="10"/>
+        <text class="t-dim" x="56" y="166">Actuation Boundary (ABEP)</text>
+
+        <!-- Arrows (drawn before components so masks hide them) -->
+
+        <!-- Signed Policy → Verify Core Gate -->
+        <path class="a-emphasis" d="M 262 289 L 328 274"/>
+        <text class="t-label-emphasis" x="268" y="268">signed rules</text>
+
+        <!-- AI Planner → Verify Core Gate -->
+        <path class="a-default" d="M 480 103 L 480 228"/>
+        <text class="t-label" x="488" y="168">action request</text>
+
+        <!-- Verify Core Gate → Replay Cache -->
+        <path class="a-default" d="M 632 258 L 718 201"/>
+
+        <!-- Verify Core Gate → Audit Log -->
+        <path class="a-default" d="M 632 290 L 718 346"/>
+
+        <!-- Verify Core Gate → Auth Token -->
+        <path class="a-emphasis" d="M 480 320 L 480 393"/>
+        <text class="t-label-emphasis" x="488" y="358">ALLOW</text>
+
+        <!-- Auth Token → Robot Actuator -->
+        <path class="a-emphasis" d="M 480 443 L 480 503"/>
+        <text class="t-label-emphasis" x="488" y="476">authorized command</text>
+
+        <!-- Verify Core Gate → AI Planner (DENY) -->
+        <path class="a-security" d="M 350 232 Q 280 180 380 103"/>
+        <text class="t-label-security" x="288" y="158">DENY + reason</text>
+
+        <!-- AI Planner ··· Robot Actuator (blocked bypass) -->
+        <path class="a-security-blocked" d="M 614 76 Q 820 240 640 488"/>
+        <line class="x-mark" x1="718" y1="298" x2="732" y2="312"/>
+        <line class="x-mark" x1="732" y1="298" x2="718" y2="312"/>
+        <text class="t-blocked" x="738" y="308">BLOCKED</text>
+
+        <!-- Components -->
+
+        <!-- AI Planner / LLM -->
+        <g>
+          <rect class="c-mask" x="348" y="44" width="264" height="58" rx="6"/>
+          <rect class="c-external" x="348" y="44" width="264" height="58" rx="6"/>
+          <text class="t-primary" x="480" y="68" text-anchor="middle">AI Planner / LLM</text>
+          <text class="t-muted" x="480" y="86" text-anchor="middle">Proposes robot actions</text>
+        </g>
+
+        <!-- Signed Policy Capsule -->
+        <g>
+          <rect class="c-mask" x="68" y="260" width="194" height="58" rx="6"/>
+          <rect class="c-backend" x="68" y="260" width="194" height="58" rx="6"/>
+          <text class="t-primary" x="165" y="284" text-anchor="middle">Signed Policy</text>
+          <text class="t-muted" x="165" y="302" text-anchor="middle">Ed25519 capsule</text>
+        </g>
+
+        <!-- Verify Core Gate (largest / most prominent) -->
+        <g>
+          <rect class="c-mask" x="328" y="228" width="304" height="92" rx="6"/>
+          <rect class="c-security" x="328" y="228" width="304" height="92" rx="6"/>
+          <text class="t-primary-lg" x="480" y="262" text-anchor="middle">Verify Core Gate</text>
+          <text class="t-muted" x="480" y="282" text-anchor="middle">Deterministic · Fail-closed</text>
+        </g>
+
+        <!-- Replay Cache -->
+        <g>
+          <rect class="c-mask" x="718" y="175" width="182" height="52" rx="6"/>
+          <rect class="c-database" x="718" y="175" width="182" height="52" rx="6"/>
+          <text class="t-primary" x="809" y="196" text-anchor="middle">Replay Cache</text>
+          <text class="t-muted" x="809" y="212" text-anchor="middle">Token reuse prevention</text>
+        </g>
+
+        <!-- Audit Log -->
+        <g>
+          <rect class="c-mask" x="718" y="320" width="182" height="52" rx="6"/>
+          <rect class="c-database" x="718" y="320" width="182" height="52" rx="6"/>
+          <text class="t-primary" x="809" y="341" text-anchor="middle">Audit Log</text>
+          <text class="t-muted" x="809" y="357" text-anchor="middle">Hash-chained JSONL</text>
+        </g>
+
+        <!-- Authorization Token -->
+        <g>
+          <rect class="c-mask" x="405" y="393" width="150" height="50" rx="6"/>
+          <rect class="c-cloud" x="405" y="393" width="150" height="50" rx="6"/>
+          <text class="t-primary" x="480" y="414" text-anchor="middle">Auth Token</text>
+          <text class="t-muted" x="480" y="430" text-anchor="middle">Short-lived, action-bound</text>
+        </g>
+
+        <!-- Robot Actuator -->
+        <g>
+          <rect class="c-mask" x="348" y="503" width="264" height="58" rx="6"/>
+          <rect class="c-backend" x="348" y="503" width="264" height="58" rx="6"/>
+          <text class="t-primary" x="480" y="527" text-anchor="middle">Robot Actuator</text>
+          <text class="t-muted" x="480" y="545" text-anchor="middle">Validates token before executing</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot rose" aria-hidden="true"></span>
+          <h3>Security Enforcement</h3>
+        </div>
+        <ul>
+          <li>Signed policy capsules (Ed25519)</li>
+          <li>Fail-closed gate semantics</li>
+          <li>Short-lived authorization tokens</li>
+          <li>Replay and rollback defense</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot violet" aria-hidden="true"></span>
+          <h3>Audit &amp; Evidence</h3>
+        </div>
+        <ul>
+          <li>Hash-chained append-only JSONL log</li>
+          <li>Every ALLOW and DENY recorded</li>
+          <li>Tamper-evident chain verification</li>
+          <li>Action hash + policy hash binding</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot emerald" aria-hidden="true"></span>
+          <h3>Hardware Path</h3>
+        </div>
+        <ul>
+          <li>Stage 0: Software simulation (current)</li>
+          <li>Stage 1: TPM-backed signing</li>
+          <li>Stage 2: Microcontroller gate</li>
+          <li>Stage 3: FPGA / ASIC enforcement</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Press <kbd>T</kbd> to toggle theme · Dark / Light modes
+    </div>
+  </div>
+
+  <script>
+    var btn = document.getElementById('btn-theme');
+    var icon = document.getElementById('theme-icon');
+    var label = document.getElementById('theme-label');
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      icon.textContent = next === 'dark' ? '☾' : '☼';
+      label.textContent = next === 'dark' ? 'Dark' : 'Light';
+      try { localStorage.setItem('archify-theme', next); } catch(_) {}
+    }
+    btn.addEventListener('click', toggleTheme);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); }
+    });
+  </script>
+</body>
+</html>
