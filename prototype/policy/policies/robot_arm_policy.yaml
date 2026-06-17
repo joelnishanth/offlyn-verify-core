@@ -1,0 +1,38 @@
+policy_id: robot_arm_policy_v1
+policy_epoch: 1
+actor: robot_planner_01
+rules:
+  - action: move_joint
+    target: joint_2
+    max_speed: 0.5
+    min_angle_degrees: -90
+    max_angle_degrees: 90
+    allowed_zones:
+      - safe_area_a
+      - safe_area_b
+    deny_when_human_nearby: true
+
+  - action: move_joint
+    target: joint_1
+    max_speed: 0.3
+    min_angle_degrees: -45
+    max_angle_degrees: 45
+    allowed_zones:
+      - safe_area_a
+    deny_when_human_nearby: true
+
+  - action: gripper_open
+    target: gripper_1
+    max_speed: 1.0
+    allowed_zones:
+      - safe_area_a
+      - safe_area_b
+    deny_when_human_nearby: false
+
+  - action: gripper_close
+    target: gripper_1
+    max_speed: 0.8
+    allowed_zones:
+      - safe_area_a
+      - safe_area_b
+    deny_when_human_nearby: false

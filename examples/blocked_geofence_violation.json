@@ -1,0 +1,15 @@
+{
+  "actor": "robot_planner_01",
+  "action": "move_joint",
+  "target": "joint_2",
+  "parameters": {
+    "angle_degrees": 10,
+    "speed": 0.2
+  },
+  "context": {
+    "zone": "restricted_zone_x",
+    "human_nearby": false
+  },
+  "expected_decision": "deny",
+  "expected_reason": "zone_not_allowed"
+}

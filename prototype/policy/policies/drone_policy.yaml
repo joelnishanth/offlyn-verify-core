@@ -1,0 +1,35 @@
+policy_id: drone_policy_v1
+policy_epoch: 1
+actor: drone_planner_01
+rules:
+  - action: set_altitude
+    target: rotor_assembly
+    max_altitude_meters: 120
+    min_altitude_meters: 0
+    max_speed: 5.0
+    allowed_zones:
+      - airspace_alpha
+      - airspace_beta
+    deny_when_human_nearby: true
+
+  - action: move_lateral
+    target: rotor_assembly
+    max_speed: 10.0
+    allowed_zones:
+      - airspace_alpha
+      - airspace_beta
+    geofence:
+      min_lat: 37.0
+      max_lat: 38.0
+      min_lon: -123.0
+      max_lon: -122.0
+    deny_when_human_nearby: true
+
+  - action: land
+    target: rotor_assembly
+    max_speed: 2.0
+    allowed_zones:
+      - airspace_alpha
+      - airspace_beta
+      - landing_zone_1
+    deny_when_human_nearby: false

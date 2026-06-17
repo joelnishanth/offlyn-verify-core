@@ -1,0 +1,40 @@
+sequenceDiagram
+    participant P as AI Planner
+    participant G as Verify Core Gate
+    participant PO as Policy Store
+    participant A as Actuator
+    participant L as Audit Log
+
+    Note over G,PO: Startup: load signed policy
+    G->>PO: Load policy capsule
+    PO-->>G: Signed policy (epoch=1)
+    G->>G: Verify Ed25519 signature
+    G->>G: Check epoch ≥ current
+
+    Note over P,A: Scenario: Safe action
+    P->>G: ActionRequest(move_joint, speed=0.4)
+    G->>G: Check actor, action, speed, angle, zone, human
+    G->>L: Log ALLOW
+    G-->>P: GateDecision(ALLOW)
+    G-->>A: AuthorizationToken(hash, nonce, expiry)
+    A->>A: Validate token signature
+    A->>A: Check not expired
+    A->>A: Check not replayed
+    A->>A: Check action hash match
+    A-->>A: Execute command ✓
+
+    Note over P,A: Scenario: Unsafe action
+    P->>G: ActionRequest(move_joint, speed=1.2)
+    G->>G: speed 1.2 > max 0.5
+    G->>L: Log DENY
+    G-->>P: GateDecision(DENY, speed_exceeds_limit)
+    Note over A: Actuator never receives command
+
+    Note over P,A: Scenario: Replay attack
+    P->>A: Replay: reuse old AuthorizationToken
+    A->>A: Check replay cache
+    A-->>P: REJECTED (token_replayed)
+
+    Note over P,A: Scenario: Direct bypass
+    P->>A: Command without token
+    A-->>P: REJECTED (no_authorization_token)

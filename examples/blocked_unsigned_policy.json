@@ -1,0 +1,7 @@
+{
+  "description": "Attempt to load an unsigned policy into Verify Core",
+  "policy_file": "policy/policies/robot_arm_policy.yaml",
+  "signed": false,
+  "expected_result": "rejected",
+  "expected_error": "Policy is unsigned — no signature present"
+}

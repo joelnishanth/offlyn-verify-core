@@ -1,0 +1,24 @@
+{
+  "description": "Replay attack: reuse a valid authorization token for a second execution",
+  "step_1": {
+    "actor": "robot_planner_01",
+    "action": "move_joint",
+    "target": "joint_2",
+    "parameters": {
+      "angle_degrees": 45,
+      "speed": 0.4
+    },
+    "context": {
+      "zone": "safe_area_a",
+      "human_nearby": false
+    },
+    "expected_decision": "allow",
+    "expected_actuator": "executed"
+  },
+  "step_2_replay": {
+    "reuse_token_from": "step_1",
+    "expected_decision": "N/A (token-level rejection)",
+    "expected_actuator": "rejected",
+    "expected_reason": "token_replayed"
+  }
+}

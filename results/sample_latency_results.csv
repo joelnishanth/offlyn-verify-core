@@ -1,0 +1,5 @@
+metric,p50_us,p95_us,p99_us,max_us,iterations
+gate_decision_latency,45,120,180,350,10000
+policy_verification_latency,850,1200,1500,2100,1000
+token_validation_latency,30,80,110,200,10000
+token_issuance_latency,40,100,140,250,10000

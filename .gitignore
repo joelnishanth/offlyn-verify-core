@@ -1,0 +1,32 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Local/runtime
+*.jsonl
+*.db
+.env
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Keys (demo keys are gitignored by default; generate locally)
+prototype/policy/*.pem

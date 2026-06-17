@@ -1,0 +1,12 @@
+scenario,attempts,blocked,block_rate,false_positives
+speed_violation,1000,1000,100.0%,0
+angle_violation,1000,1000,100.0%,0
+zone_violation,1000,1000,100.0%,0
+human_nearby,1000,1000,100.0%,0
+unsigned_policy,100,100,100.0%,0
+tampered_policy,100,100,100.0%,0
+policy_rollback,100,100,100.0%,0
+replay_attack,1000,1000,100.0%,0
+direct_bypass,1000,1000,100.0%,0
+token_forgery,1000,1000,100.0%,0
+safe_action_allowed,1000,0,0.0%,0

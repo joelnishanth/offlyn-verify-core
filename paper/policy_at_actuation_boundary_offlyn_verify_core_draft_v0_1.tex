@@ -1,0 +1,493 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xspace}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{microtype}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=black
+}
+
+\newcommand{\ovc}{Offlyn Verify Core\xspace}
+\newcommand{\abep}{Actuation Boundary Enforcement Point\xspace}
+
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible
+}
+
+\title{Policy at the Actuation Boundary:\\Hardware-Enforced Safety for AI-Controlled Robots}
+\author{Author Name(s)\\Offlyn Verify Core Project\\\texttt{author@example.com}}
+\date{Draft v0.1 -- June 16, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Large foundation models and agentic planners are increasingly being connected to robots, drones, industrial manipulators, and other cyber-physical systems. This creates a new safety problem: a model may propose an unsafe action, a compromised software stack may bypass a software guardrail, or a benign task may become physically unsafe when translated into concrete actuation parameters. Existing safeguards for LLM-enabled robots include prompt-level constraints, pre-execution validators, temporal-logic planners, runtime assurance frameworks, safety filters, and ROS-level middleware. These approaches are valuable, but many remain inside the same software trust domain as the planner, executor, operating system, or middleware they are intended to constrain.
+
+This paper proposes \ovc, a hardware-rooted policy gate placed at the actuation boundary between the autonomy stack and the physical command path. The key idea is to move final action authorization into a small, deterministic, separately controlled enforcement point that releases actuator-bound commands only after checking signed policy capsules, actor identity, command schema, physical bounds, freshness, and selected state predicates. We define the \abep abstraction, an action authorization interface, fail-closed enforcement semantics, and an evidence model for allow and deny decisions. The paper positions \ovc relative to recent work on LLM robot guardrails, pre-execution safety gates, zero-trust policy models for agentic cyber-physical systems, runtime assurance, control barrier functions, and mixed-criticality robotics. The contribution is not a claim that hardware alone makes robots safe. Rather, it is a concrete systems architecture for reducing the trusted computing base of AI-controlled robotic actuation by making the final authorization boundary smaller, auditable, tamper-resistant, and physically harder to bypass.
+\end{abstract}
+
+\section{Introduction}
+
+Robotics is entering a period in which high-level language models and agentic planners are being given increasingly direct paths to physical action. A user may issue a natural-language task, a foundation model may decompose that task into tool calls, and a robotics middleware layer may translate those tool calls into movement, grasping, navigation, or manipulation commands. The benefit is flexibility: robots can be commanded in ordinary language and adapted to new environments with less hand-coded task logic. The risk is that the final output of a probabilistic planner becomes a physical event.
+
+The safety problem changes when an AI system can move mass, apply force, enter a restricted zone, operate around humans, or modify industrial process state. A chatbot error may be reversible; a robot action may not be. For this reason, recent work has proposed new safety guardrails for LLM-enabled robots \cite{roboguard2025}, neurosymbolic pre-execution safety gates and task safety contracts \cite{safegate2026}, ROS-level executive layers with action validators and audit logs \cite{rosclaw2026}, and zero-trust policy primitives for agentic cyber-physical systems \cite{ztpm2026}. Runtime assurance has also long studied how an unverified advanced controller can be monitored or overridden by a trusted safety controller \cite{simplex2021,nasa2024rta}. Control barrier functions and shielding provide mathematically grounded methods for keeping control inputs within safe sets \cite{ames2019cbf,shields2022}. Mixed-criticality robotics work shows that hardware-enforced isolation and safety I/O cells can reduce interference between real-time control and best-effort software \cite{jiao2026}.
+
+These lines of work are complementary, but they leave an architectural gap for AI-controlled robots: where exactly should final authority over physical action live? If the policy engine, guardrail, action validator, and audit log all execute inside the same robot computer, ROS graph, operating system, container runtime, or agent framework as the planner, then a single compromised or misconfigured software trust domain may be able to alter, bypass, or disable the constraint. This paper argues that the final policy enforcement point should be moved as close as practical to the physical actuation path.
+
+We call this boundary the \abep. It is the last mandatory authorization surface before a command can affect robot motion, force, position, tool activation, or other safety-relevant physical state. The proposed \ovc design treats this boundary as a small hardware-rooted component that accepts canonical action requests and releases actuator-bound commands only when deterministic checks pass. It is not a replacement for classical functional safety, runtime assurance, CBFs, formal planning, or human supervision. It is an additional, narrower trust boundary that makes it harder for an AI planner or compromised host to convert unsafe intent into physical motion.
+
+\subsection{Research question}
+
+The central research question is:
+
+\begin{quote}
+Can a small hardware-rooted actuation policy gate reduce the trusted computing base for AI-controlled robots while preserving useful real-time actuation performance and auditability?
+\end{quote}
+
+This framing deliberately avoids two overclaims. First, it does not claim that policy enforcement is new. Second, it does not claim that hardware enforcement is sufficient for safety. The claim is narrower: for AI-controlled robots, there is value in relocating final authorization from a large, modifiable software stack to a small, deterministic, hardware-rooted boundary.
+
+\subsection{Contributions}
+
+This paper makes four contributions:
+
+\begin{enumerate}[leftmargin=*]
+  \item It defines the \abep abstraction for AI-controlled robots: a mandatory, fail-closed authorization point between AI-generated action requests and physical actuation.
+  \item It proposes the \ovc architecture, including signed policy capsules, canonical action requests, freshness checks, actor identity, bounded state predicates, command release semantics, and tamper-evident evidence records.
+  \item It distinguishes \ovc from adjacent software guardrails, pre-execution validators, runtime assurance architectures, CBF-based safety filters, and mixed-criticality hardware isolation.
+  \item It provides an evaluation protocol for measuring safety leakage, false rejection, latency overhead, bypass resistance, replay resistance, and audit completeness without overstating unimplemented hardware claims.
+\end{enumerate}
+
+\section{Prior Art and Gap}
+
+Recent research has already identified important pieces of the problem. RoboGuard addresses safety risks in LLM-enabled robots by grounding safety rules into context-dependent temporal logic constraints and synthesizing plans that satisfy those constraints \cite{roboguard2025}. SafeGate introduces a neurosymbolic gate for LLM-controlled robots and task safety contracts that decompose accepted commands into invariants, guards, and abort conditions \cite{safegate2026}. ROSClaw provides a model-agnostic ROS 2 executive layer with dynamic capability discovery, observation normalization, pre-execution validation, and structured audit logging \cite{rosclaw2026}. ZTPM proposes typed zero-trust policy primitives and physical impact tiers for agentic cyber-physical systems \cite{ztpm2026}. EHV explores a hardware-rooted zero-trust enforcement architecture for agentic AI systems more generally, using trusted execution environments, policy synchronization, and machine-readable audit logging \cite{ehv2026}.
+
+Classical runtime assurance and Simplex-style architectures address the problem of using unverified high-performance controllers in safety-critical systems by monitoring and, when necessary, switching to a trusted controller \cite{simplex2021,nasa2024rta}. Safety filters based on control barrier functions can modify or reject control actions to maintain forward invariance of a safe set \cite{ames2019cbf}. Shielding approaches in reinforcement learning similarly block unsafe actions at runtime based on formal models or abstractions \cite{shields2022}. Jiao addresses mixed-criticality robotics by combining static partitioning, hardware-level override capability, and safety communication layers to preserve isolation in consolidated robot platforms \cite{jiao2026}.
+
+The gap is not absence of safety checking. The gap is the trust placement of the final action authority. Table \ref{tab:related} summarizes the distinction.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Positioning \ovc against adjacent approaches. A check mark indicates the primary focus of the cited work, not an exhaustive capability claim.}
+\label{tab:related}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.7cm}X>{\centering\arraybackslash}p{1.45cm}>{\centering\arraybackslash}p{1.45cm}>{\centering\arraybackslash}p{1.55cm}>{\centering\arraybackslash}p{1.55cm}}
+\toprule
+Approach & Main focus & LLM robot safety & Formal policy or verification & Hardware-rooted boundary & Direct actuation placement \\
+\midrule
+RoboGuard \cite{roboguard2025} & Contextual safety rules and temporal-logic plan synthesis for LLM-enabled robots & Yes & Yes & No & No \\
+SafeGate \cite{safegate2026} & Neurosymbolic pre-execution gate and task safety contracts & Yes & Yes & No & No \\
+ROSClaw \cite{rosclaw2026} & ROS 2 executive layer with validation and audit logging & Yes & Partial & No & Middleware \\
+ZTPM \cite{ztpm2026} & Zero-trust policy primitives and physical impact tiers & Yes & Policy model & No & Policy boundary \\
+EHV \cite{ehv2026} & Hardware-rooted runtime enforcement for general agentic AI systems & General agents & Yes & Yes & Not robot-specific \\
+Simplex/RTA \cite{simplex2021,nasa2024rta} & Runtime override of unverified controllers & Not LLM-specific & Yes & Varies & Controller authority \\
+CBF/shielding \cite{ames2019cbf,shields2022} & Mathematical safety filters over states and controls & Not LLM-specific & Yes & No & Control input filter \\
+Jiao \cite{jiao2026} & Mixed-criticality partitioning and safety I/O cells & Not LLM-specific & Safety communication & Yes & Control platform I/O \\
+\ovc & Hardware-rooted authorization for AI-originated robotic action requests & Yes & Deterministic policy gate & Yes & Actuation boundary \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+The proposed contribution is the combination of: (i) AI-originated action requests, (ii) a canonical action authorization interface, (iii) signed policy capsules, (iv) hardware-rooted fail-closed release of actuator-bound commands, and (v) evidence records for each allow or deny outcome. To the best of our current literature scan, this exact systems framing is not yet established as a peer-reviewed robotics paper. The closest research neighbors are ZTPM, SafeGate, ROSClaw, EHV, Simplex/RTA, and Jiao; the proposed design should therefore be presented as an integration and boundary-placement contribution rather than as a claim that policy enforcement or robot safety monitoring is itself novel.
+
+\section{System Model}
+
+\subsection{Robot stack}
+
+We model an AI-controlled robot as a pipeline with five logical layers:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{User or task source}: natural-language command, fleet scheduler, operator console, or autonomous mission planner.
+  \item \textbf{AI planner}: LLM, vision-language-action model, hierarchical planner, or multi-agent system that proposes actions.
+  \item \textbf{Executive layer}: middleware that converts proposed actions into structured robot commands, such as ROS 2 service calls, motion goals, end-effector operations, navigation goals, or tool activations.
+  \item \textbf{Actuation boundary}: the last mandatory authorization point before commands reach motor controllers, robot drivers, servo buses, tool controllers, power relays, or safety-relevant I/O.
+  \item \textbf{Physical plant}: robot body, actuators, tools, environment, and nearby humans.
+\end{enumerate}
+
+\ovc is placed at layer 4. The executive layer remains useful: it can validate task plans, normalize observations, run simulation checks, call CBF-based filters, and maintain high-level logs. \ovc does not replace those controls. It assumes that the executive layer may be wrong or compromised and therefore does not treat software approval as sufficient for physical action.
+
+\subsection{Threat model}
+
+The threat model includes the following failures and attacks:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Unsafe model output}: the planner proposes a task that is semantically unsafe, physically impossible, or outside the robot's allowed work envelope.
+  \item \textbf{Unsafe parameterization}: the high-level task is acceptable, but the generated speed, force, pose, path, torque, or tool parameter is outside policy.
+  \item \textbf{Prompt or instruction injection}: the planner is induced to ignore a safety rule or call a privileged action.
+  \item \textbf{Middleware compromise}: the host OS, ROS graph, container runtime, action broker, or policy service is compromised.
+  \item \textbf{Replay or rollback}: a previously authorized command or older permissive policy is replayed.
+  \item \textbf{Audit tampering}: a host attempts to hide denied actions or fabricate compliance evidence.
+\end{itemize}
+
+The proposed design does not solve every physical attack. In particular, it does not prevent mechanical tampering, malicious rewiring around the gate, sensor spoofing outside the measured trust boundary, incorrect policies, flawed hazard analysis, or unsafe hardware design. These are limitations, not edge cases. The architecture is meant to reduce the trusted computing base for action authorization, not to replace safety engineering.
+
+\subsection{Security assumptions}
+
+\ovc assumes:
+
+\begin{enumerate}[leftmargin=*]
+  \item The actuation path is wired so that safety-relevant commands must pass through the gate or the robot fails closed.
+  \item The gate has a hardware root of trust or equivalent protected boot path for firmware and policy verification.
+  \item Policy capsules are signed by an authorized policy authority and include version, epoch, validity interval, and rollback protection.
+  \item The gate can identify actors, commands, and targets using cryptographic tokens, bus-level authentication, or a deployment-specific equivalent.
+  \item The gate has access to a bounded set of trusted state predicates required by policy, such as workspace zone, emergency-stop state, human-presence flag, joint limit state, tool armed state, or velocity envelope.
+\end{enumerate}
+
+These assumptions should be tested in any implementation. In particular, claim strength depends on whether the gate actually mediates all relevant physical command paths.
+
+\section{The Actuation Boundary Enforcement Point}
+
+The \abep is a deployment-specific hardware or hardware-rooted component that mediates the conversion of an approved action request into a physical command. It may be implemented as an inline microcontroller, FPGA, safety I/O module, bus gateway, secure coprocessor, trusted motor-controller adapter, or safety PLC extension. The design point is not a single board. The design point is a mandatory enforcement semantics:
+
+\begin{quote}
+No safety-relevant actuation command is released unless a small, deterministic, independently protected gate authorizes it under a signed policy capsule and records the decision.
+\end{quote}
+
+\subsection{Canonical action request}
+
+AI planners produce diverse outputs: text, code, JSON, ROS messages, motion plans, or tool calls. \ovc requires the executive layer to reduce each safety-relevant proposed action into a canonical action request. An example request is shown below.
+
+\begin{lstlisting}[language=json,caption={Example canonical action request.}]
+{
+  "actor_id": "planner_ur3e_cell_04",
+  "request_id": "01jz9c0k3ypb8f6g7z",
+  "policy_epoch": 17,
+  "action_type": "move_joint",
+  "target_id": "ur3e_joint_3",
+  "physical_impact_tier": "T2",
+  "parameters": {
+    "angle_deg": 42.0,
+    "velocity_deg_s": 18.0,
+    "max_force_n": 25.0
+  },
+  "context": {
+    "workspace_zone": "cell_a",
+    "human_presence": false,
+    "task_id": "assembly_204"
+  },
+  "nonce": "9b21f1a4",
+  "signature": "..."
+}
+\end{lstlisting}
+
+The request is intentionally less expressive than a general robot program. A small gate should not evaluate arbitrary code. It should check a bounded schema and a bounded set of predicates. More expressive planning belongs upstream; final authorization belongs at the actuation boundary.
+
+\subsection{Policy capsule}
+
+A policy capsule is a signed, machine-readable object that defines allowed actors, targets, actions, parameter ranges, temporal validity, policy epoch, and required predicates. The capsule may be compiled from a higher-level policy language into a compact representation suitable for microcontroller or FPGA enforcement. A capsule should include:
+
+\begin{itemize}[leftmargin=*]
+  \item policy identifier and hash;
+  \item issuer identity and signature;
+  \item epoch number and rollback-protection metadata;
+  \item allowed action schemas;
+  \item actor-to-capability bindings;
+  \item static bounds such as maximum velocity, force, torque, workspace, and tool state;
+  \item dynamic predicates such as emergency-stop state, guard-zone occupancy, or sensor confidence threshold;
+  \item logging requirements for allow and deny outcomes.
+\end{itemize}
+
+This format intentionally separates high-level policy authoring from low-level enforcement. Human-readable safety policy can live in a version-controlled repository, while \ovc receives a compiled capsule that is smaller, deterministic, and easier to verify.
+
+\subsection{Decision semantics}
+
+For a request $r$, policy capsule $P_e$ at epoch $e$, and trusted state snapshot $s$, the gate computes:
+
+\[
+D(r, P_e, s) \in \{\textsc{Allow}, \textsc{Deny}, \textsc{FailClosed}\}.
+\]
+
+The default decision is \textsc{FailClosed}. The gate returns \textsc{Allow} only if all required checks pass:
+
+\begin{enumerate}[leftmargin=*]
+  \item The policy capsule signature is valid.
+  \item The capsule epoch is current and not rolled back.
+  \item The actor is authenticated and authorized for the action type.
+  \item The request schema is valid and canonicalized.
+  \item The request is fresh and not a replay.
+  \item The target actuator or tool is governed by the policy.
+  \item Static parameter bounds are satisfied.
+  \item Required state predicates are satisfied.
+  \item The output command can be encoded without ambiguity.
+  \item The decision is recorded in the evidence log.
+\end{enumerate}
+
+Any failed check yields \textsc{Deny} or \textsc{FailClosed}, depending on whether the gate can produce an authenticated denial record. If logging is unavailable, the gate must prefer fail-closed behavior for safety-relevant commands.
+
+\subsection{Minimal enforcement loop}
+
+The core enforcement loop can be expressed as follows:
+
+\begin{lstlisting}[caption={Minimal deterministic enforcement loop.}]
+function authorize(request r, state_snapshot s):
+    if not valid_policy_signature(P):
+        return fail_closed("invalid_policy")
+    if rollback_detected(P.epoch):
+        return fail_closed("policy_rollback")
+    if not fresh(r.nonce, r.timestamp):
+        return deny("replay_or_stale_request")
+    if not authenticated(r.actor_id):
+        return deny("unauthenticated_actor")
+    if not schema_valid(r):
+        return deny("schema_invalid")
+    if not actor_allowed(P, r.actor_id, r.action_type, r.target_id):
+        return deny("capability_denied")
+    if not static_bounds_hold(P, r):
+        return deny("bounds_violation")
+    if not dynamic_guards_hold(P, r, s):
+        return deny("state_guard_violation")
+    cmd = encode_actuator_command(r)
+    append_evidence("allow", r, P.hash, s.digest)
+    release(cmd)
+\end{lstlisting}
+
+This loop is deliberately simple. The value of hardware rooting increases as the trusted logic shrinks.
+
+\section{Architecture}
+
+\subsection{Components}
+
+\ovc consists of six logical components:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Action ingress}: receives canonical requests from the robot executive layer over a deployment-specific transport.
+  \item \textbf{Identity and freshness checker}: validates actor credentials, nonces, timestamps, counters, and policy epoch.
+  \item \textbf{Policy capsule verifier}: checks signatures, policy hashes, validity windows, and rollback metadata.
+  \item \textbf{Deterministic rule engine}: evaluates bounded predicates over request fields and trusted state.
+  \item \textbf{Command release path}: emits the approved actuator command, enables a relay, forwards a bus frame, or releases a cryptographic command token.
+  \item \textbf{Evidence logger}: records allow, deny, and fail-closed decisions with request digest, policy hash, reason code, and monotonic counter.
+\end{enumerate}
+
+The key design constraint is that the command release path should be physically or cryptographically unavailable to the AI planner and host software except through \ovc.
+
+\subsection{Hardware-rooted implementation options}
+
+Several implementation strategies are possible:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Inline bus gate}: a microcontroller or FPGA mediates a robot command bus and forwards only authorized frames.
+  \item \textbf{Actuator enable gate}: the gate controls an enable line, relay, or drive permission signal while command generation remains upstream.
+  \item \textbf{Secure coprocessor}: a protected execution environment authorizes action tokens that downstream drivers require before moving.
+  \item \textbf{Safety I/O module}: the gate integrates with existing safety I/O and emergency-stop circuits to provide policy-aware actuation permission.
+  \item \textbf{Hybrid gate}: software validators perform rich checks upstream, while hardware enforces a compact set of non-negotiable constraints.
+\end{itemize}
+
+The strongest non-bypass claim comes from inline physical mediation or actuator enable control. A secure coprocessor that merely returns a software decision is weaker unless downstream drivers are designed to require its authorization token.
+
+\subsection{Evidence model}
+
+For auditability, every decision should produce an evidence record:
+
+\begin{lstlisting}[language=json,caption={Example evidence record.}]
+{
+  "counter": 88421,
+  "decision": "deny",
+  "reason": "velocity_limit_exceeded",
+  "request_digest": "sha256:...",
+  "policy_hash": "sha256:...",
+  "policy_epoch": 17,
+  "state_digest": "sha256:...",
+  "gate_id": "ovc_cell_a_01",
+  "firmware_hash": "sha256:...",
+  "timestamp": "2026-06-16T18:07:15Z",
+  "record_mac": "..."
+}
+\end{lstlisting}
+
+Evidence records should be append-only from the perspective of the robot host. A practical implementation may batch records to reduce overhead, but the record counter and message authentication should make missing or reordered records detectable.
+
+\section{Relationship to Existing Safety Mechanisms}
+
+\subsection{Complementarity with LLM robot guardrails}
+
+RoboGuard, SafeGate, VerifyLLM-style task verification, and similar systems operate at the semantic and planning level. They can reason about whether a task is unsafe, whether a plan violates a temporal constraint, or whether a natural-language command should be rejected before code generation. \ovc operates at a lower layer. It assumes that upstream systems are helpful but not fully trusted. A command that passed a semantic guardrail must still satisfy physical authorization checks before actuation.
+
+\subsection{Complementarity with runtime assurance}
+
+Runtime assurance systems typically monitor behavior and switch control to a safety controller when an untrusted controller becomes unsafe. \ovc can be viewed as a narrower enforcement point within a larger runtime assurance architecture. It does not choose an alternative controller; it authorizes or blocks specific actuation requests. In practice, a denied request may trigger a Simplex-style fallback, stop command, or human intervention.
+
+\subsection{Complementarity with control barrier functions}
+
+CBFs reason about system dynamics and safe sets. They can transform an unsafe nominal control input into a safe input. \ovc should not duplicate high-dimensional control synthesis inside a tiny gate. Instead, a CBF filter can run upstream or in a trusted controller, and \ovc can enforce non-negotiable envelope constraints: maximum speed, force, torque, workspace zone, tool state, freshness, and actor authorization. For richer dynamic safety, the gate can require a signed safety certificate or bounded predicate produced by an upstream verifier, but it should only trust certificates that are fresh and bound to the exact action request.
+
+\subsection{Complementarity with mixed-criticality isolation}
+
+Mixed-criticality partitioning protects real-time control from interference by perception and application workloads. \ovc addresses a different question: even if the system is temporally isolated, who has final authority to release a safety-relevant action? A static partition or safe I/O cell can be an implementation substrate for \ovc, but the contribution is the action-policy interface and hardware-rooted authorization semantics for AI-originated commands.
+
+\section{Evaluation Protocol}
+
+A credible evaluation should measure three classes of claims: safety effectiveness, systems overhead, and bypass resistance.
+
+\subsection{Safety effectiveness}
+
+Construct a benchmark of benign, unsafe, and adversarial action requests across representative robot tasks. For a manipulator, this may include joint movement, Cartesian movement, gripper activation, tool enablement, and restricted-zone navigation. Each task should have a ground-truth expected decision under a fixed policy capsule.
+
+Metrics:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Unsafe leakage rate}: fraction of unsafe requests incorrectly allowed.
+  \item \textbf{False rejection rate}: fraction of benign requests incorrectly denied.
+  \item \textbf{Policy coverage}: fraction of safety-relevant action types represented in the policy schema.
+  \item \textbf{Reason-code precision}: fraction of denials whose reason code matches the violated policy.
+\end{itemize}
+
+\subsection{Systems overhead}
+
+Measure added latency and throughput under realistic command rates. Report median, p95, p99, and worst-case authorization latency. Separate parsing, signature verification, rule evaluation, logging, and command release. For robotics, p99 and worst-case behavior matter more than average latency.
+
+Metrics:
+
+\begin{itemize}[leftmargin=*]
+  \item p50, p95, p99 authorization latency;
+  \item maximum observed latency under load;
+  \item sustained request throughput;
+  \item memory footprint of policy capsules;
+  \item firmware or gate logic size;
+  \item energy or power overhead if measured on embedded hardware.
+\end{itemize}
+
+\subsection{Bypass and compromise resistance}
+
+Evaluate the system under explicit attack scenarios:
+
+\begin{itemize}[leftmargin=*]
+  \item host attempts to send commands directly to actuators;
+  \item host replays an old allowed command;
+  \item host rolls back to a permissive policy capsule;
+  \item host tampers with a request after upstream approval;
+  \item host suppresses deny logs;
+  \item compromised planner changes actor identity;
+  \item adversarial prompt requests unsafe tool activation;
+  \item sensor predicate is missing or stale.
+\end{itemize}
+
+The primary metric is bypass success rate. A strong implementation should show that host compromise alone cannot release an unauthorized safety-relevant command through the mediated path.
+
+\subsection{Comparative baselines}
+
+Compare at least four configurations:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{No gate}: direct planner or executive access to robot commands.
+  \item \textbf{Software validator}: policy checks run in the same host trust domain as the planner or middleware.
+  \item \textbf{Middleware gate}: ROS-level or service-level pre-execution validation with audit logging.
+  \item \textbf{Hardware-rooted gate}: \ovc mediates the actuation path and logs decisions independently.
+\end{enumerate}
+
+The expected result is not that \ovc understands tasks better than semantic guardrails. The expected result is that \ovc reduces bypass success under host compromise and policy rollback while adding bounded latency.
+
+\section{Prototype Plan}
+
+A minimum viable prototype can be built without fabricating a custom chip. The first implementation should use:
+
+\begin{itemize}[leftmargin=*]
+  \item a robot simulator or low-risk robot platform;
+  \item a scripted or LLM-based planner that emits canonical action requests;
+  \item a software executive layer that translates tasks into movement commands;
+  \item a microcontroller or FPGA development board acting as the gate;
+  \item a signed policy capsule format compiled from a human-readable policy file;
+  \item a mediated command path, such as serial, CAN-like test bus, PWM enable, or simulated actuator driver;
+  \item an append-only evidence log exported for verification.
+\end{itemize}
+
+The first paper can report an emulated or development-board prototype. A later paper can move the deterministic rule engine into FPGA fabric or ASIC layout and evaluate area, timing, power, and fault behavior. The current manuscript should not claim silicon implementation until measured silicon or FPGA results exist.
+
+\section{Limitations}
+
+\ovc has important limitations:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Policy correctness}: a hardware gate faithfully enforcing a bad policy can still permit unsafe behavior.
+  \item \textbf{State observability}: dynamic predicates are only as reliable as the sensors and trust boundary that supply them.
+  \item \textbf{Expressiveness}: a small gate should not run arbitrary planners or high-dimensional optimization. This limits what it can decide locally.
+  \item \textbf{Integration complexity}: industrial robots use diverse buses, controllers, safety systems, and certification requirements.
+  \item \textbf{Bypass by rewiring}: physical attackers may bypass a gate unless the system is mechanically and electrically designed to prevent it or detect it.
+  \item \textbf{Certification}: hardware-rooted policy enforcement is not equivalent to compliance with functional safety standards.
+\end{itemize}
+
+These limitations are compatible with the paper's thesis. The goal is not to make a robot safe by adding a single box. The goal is to make final AI-originated action authorization smaller, more deterministic, more auditable, and harder for the AI runtime to override.
+
+\section{Discussion}
+
+The most important design choice is where to draw the boundary. If the boundary is too high, it becomes another software guardrail. If it is too low, it lacks the semantic information needed to make useful policy decisions. The proposed compromise is to require the executive layer to produce canonical, semantically labeled action requests, while the hardware-rooted gate enforces compact policy over those requests and a bounded set of trusted state predicates.
+
+This design also changes how robotic safety evidence can be produced. Instead of asking whether a model ``understands'' safety, we can ask whether every physical action was released under a specific policy hash, firmware hash, actor identity, state digest, and decision counter. That does not prove global safety, but it turns part of the safety story into reproducible systems evidence.
+
+Finally, \ovc suggests a path toward standardization. Robot vendors and labs could define common action schemas, policy capsule formats, evidence records, and conformance tests. This would let researchers compare actuation-boundary claims across platforms instead of relying on narrative descriptions of guardrails.
+
+\section{Conclusion}
+
+AI-controlled robots require safety mechanisms that account for both model-level failures and physical consequences. Software guardrails, task validators, runtime assurance, CBF filters, and mixed-criticality isolation are all important, but none alone answers the systems question of where final physical action authority should reside. This paper proposes \ovc, a hardware-rooted actuation policy gate that mediates AI-originated action requests before they reach safety-relevant actuators or tools.
+
+The core claim is intentionally narrow: placing a small, deterministic, signed-policy enforcement point at the actuation boundary can reduce the trusted computing base for robotic action authorization and improve auditability under software compromise. Future work should implement the gate on real embedded hardware, publish a reproducible benchmark suite, measure latency and bypass resistance, and compare against software-only validators in realistic robot deployments.
+
+\begin{thebibliography}{99}
+
+\bibitem{roboguard2025}
+Z. Ravichandran, A. Robey, V. Kumar, G. J. Pappas, and H. Hassani.
+\newblock Safety Guardrails for LLM-Enabled Robots.
+\newblock \emph{arXiv:2503.07885}, 2025; revised 2026.
+
+\bibitem{safegate2026}
+I. Obi, V. L. N. Venkatesh, W. Wang, R. Wang, D. Suh, T. I. Amosa, W. Jo, and B.-C. Min.
+\newblock Pre-Execution Safety Gate and Task Safety Contracts for LLM-Controlled Robot Systems.
+\newblock \emph{arXiv:2604.05427}, 2026.
+
+\bibitem{rosclaw2026}
+I. S. Cardenas, M. A. Arnett, N. C. Yeo, L. Sah, and J.-H. Kim.
+\newblock ROSClaw: An OpenClaw ROS 2 Framework for Agentic Robot Control and Interaction.
+\newblock \emph{arXiv:2603.26997}, 2026.
+
+\bibitem{ztpm2026}
+T. Ranathunga, K. Fernando, and S. Rea.
+\newblock When Agents Control Robots: A Zero Trust Policy Model for Agentic Cyber-Physical Systems.
+\newblock \emph{arXiv:2605.25653}, 2026.
+
+\bibitem{ehv2026}
+R. M. Sharma.
+\newblock Ethical Hyper-Velocity (EHV): A Hardware-Rooted Zero-Trust Runtime Enforcement Architecture for Agentic AI Systems.
+\newblock \emph{arXiv:2605.17909}, 2026.
+
+\bibitem{simplex2021}
+U. Mehmood, S. Sheikhi, S. Bak, S. A. Smolka, and S. D. Stoller.
+\newblock The Black-Box Simplex Architecture for Runtime Assurance of Autonomous CPS.
+\newblock \emph{arXiv:2102.12981}; NASA Formal Methods, 2022.
+
+\bibitem{nasa2024rta}
+NASA Technical Reports Server.
+\newblock A Verification Framework for Runtime Assurance of Autonomous UAS.
+\newblock NTRS citation 20240007986, 2024.
+
+\bibitem{ames2019cbf}
+A. D. Ames, S. Coogan, M. Egerstedt, G. Notomista, K. Sreenath, and P. Tabuada.
+\newblock Control Barrier Functions: Theory and Applications.
+\newblock \emph{European Control Conference}, 2019.
+
+\bibitem{shields2022}
+M. Alshiekh, R. Bloem, R. Ehlers, B. Konighofer, S. Niekum, and U. Topcu.
+\newblock Safe Reinforcement Learning via Shielding.
+\newblock \emph{Proceedings of the AAAI Conference on Artificial Intelligence}, 2018. See also later survey treatments of shielding for safe reinforcement learning.
+
+\bibitem{jiao2026}
+J. Yen, Z. Huang, Z. Wei, T. Yi, S. Zeng, L. Pang, S. Xue, and Z. Qi.
+\newblock Jiao: Bridging Isolation and Customization in Mixed Criticality Robotics.
+\newblock \emph{arXiv:2605.03641}, 2026.
+
+\end{thebibliography}
+
+\end{document}
