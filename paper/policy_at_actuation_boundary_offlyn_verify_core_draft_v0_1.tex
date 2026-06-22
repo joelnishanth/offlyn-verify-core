@@ -30,8 +30,8 @@
 }
 
 \title{Policy at the Actuation Boundary:\\Hardware-Rooted Safety Enforcement for AI-Controlled Robots}
-\author{Joel Nishanth Ponukumatla\\Offlyn Verify Core Project\\\texttt{joelnishanthreddy@gmail.com} · \texttt{hi@offlyn.ai}}
-\date{Draft v0.2 -- June 17, 2026}
+\author{Rahul Natarajan and Joel Nishanth Reddy\\Offlyn.ai\\\texttt{hi@offlyn.ai}}
+\date{Draft v0.3 -- June 22, 2026}
 
 \begin{document}
 \maketitle
@@ -428,6 +428,14 @@ A minimum viable prototype can be built without fabricating a custom chip. The f
 
 The first paper can report an emulated or development-board prototype. A later paper can move the deterministic rule engine into FPGA fabric or ASIC layout and evaluate area, timing, power, and fault behavior. The current manuscript should not claim silicon implementation until measured silicon or FPGA results exist.
 
+\section{Hardware Reference Artifact: SilicaFold}
+
+SilicaFold is a TinyTapeout-scale hardware prototype that demonstrates a narrow, deterministic policy-gate primitive for structured agent actions~\cite{silicafold2026}. It is not the full \ovc system. Instead, it provides hardware-backed evidence that a policy-at-actuation-boundary decision primitive can be represented in RTL, validated with reproducible tests, and prepared for open silicon workflows. \ovc extends this primitive into a broader architecture involving signed policies, context attestation, authenticated command channels, audit integrity, runtime normalization, and human-in-the-loop escalation.
+
+\subsection{Boundary of Claims}
+
+The SilicaFold V0 artifact should be interpreted as supporting evidence for feasibility, not as a production security implementation. It does not implement cryptographic policy verification, secure boot, authenticated pins, replay protection, tamper resistance, or append-only audit digests. These capabilities are part of future \ovc architecture and patent/paper work. SilicaFold demonstrates that part of the policy-at-actuation-boundary concept can be represented as deterministic hardware; it does not demonstrate the full VerifyCore enforcement stack or production security properties.
+
 \section{Limitations}
 
 \ovc has important limitations:
@@ -462,9 +470,14 @@ The core claim is intentionally narrow: placing a small, deterministic, signed-p
 
 \section*{Artifact Availability}
 
-The \ovc v0.1 artifact is publicly available at:
+The \ovc artifact is publicly available at:
 \begin{center}
-\url{https://github.com/joelnishanth/offlyn-verify-core/releases/tag/v0.1-paper-artifact}
+\url{https://github.com/rahulraonatarajan/offlyn-verify-core}
+\end{center}
+
+\noindent The SilicaFold hardware reference artifact is available at:
+\begin{center}
+\url{https://github.com/offlyn-ai/silicafold-offlyn.ai-chip}
 \end{center}
 
 \noindent The artifact includes the paper source, reproducible Python prototype, signed policy capsule flow, deterministic Verify Core gate simulator, actuator simulators, scenario runner, tamper-evident audit-log hash chaining, replay and rollback tests, benchmark scripts, sample benchmark results, and documentation for the staged path from software simulation to TPM, microcontroller, FPGA, and ASIC implementations. All latency measurements reported in this paper are software-simulation measurements and should not be interpreted as hardware performance claims. All tests and scenarios can be reproduced with standard Python tooling and no external services.
@@ -520,6 +533,12 @@ M. Alshiekh, R. Bloem, R. Ehlers, B. Konighofer, S. Niekum, and U. Topcu.
 J. Yen, Z. Huang, Z. Wei, T. Yi, S. Zeng, L. Pang, S. Xue, and Z. Qi.
 \newblock Jiao: Bridging Isolation and Customization in Mixed Criticality Robotics.
 \newblock \emph{arXiv:2605.03641}, 2026.
+
+\bibitem{silicafold2026}
+R. Natarajan and J. N. Reddy.
+\newblock SilicaFold: A TinyTapeout Hardware Primitive for Policy-Gated Offline AI Actuation.
+\newblock Draft / forthcoming hardware-backed data paper, Offlyn.ai, 2026.
+\newblock \url{https://github.com/offlyn-ai/silicafold-offlyn.ai-chip}
 
 \end{thebibliography}
 

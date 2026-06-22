@@ -1,6 +1,6 @@
 # Policy at the Actuation Boundary: Hardware-Rooted Safety Enforcement for AI-Controlled Robots
 
-![tests](https://github.com/joelnishanth/offlyn-verify-core/actions/workflows/tests.yml/badge.svg)
+![tests](https://github.com/rahulraonatarajan/offlyn-verify-core/actions/workflows/tests.yml/badge.svg)
 
 **Offlyn Verify Core** is a research prototype for hardware-rooted safety enforcement at the actuation boundary of AI-controlled robots. The system models a small deterministic policy gate placed between an AI planner and robot actuators. The planner may propose actions, but actuators only execute commands that carry a valid, short-lived authorization from the Verify Core gate.
 
@@ -14,7 +14,7 @@ This repository accompanies the draft paper:
 
 - [PDF draft](paper/policy_at_actuation_boundary_offlyn_verify_core_draft_v0_1.pdf)
 - [LaTeX source](paper/policy_at_actuation_boundary_offlyn_verify_core_draft_v0_1.tex)
-- [v0.1 artifact release](https://github.com/joelnishanth/offlyn-verify-core/releases/tag/v0.1-paper-artifact)
+- [v0.1 artifact release](https://github.com/rahulraonatarajan/offlyn-verify-core/releases/tag/v0.1-paper-artifact)
 
 The prototype in `prototype/` implements the paper's core architecture as a reproducible software simulation of a hardware-rooted actuation-boundary enforcement point.
 
@@ -43,7 +43,7 @@ Full threat model: [docs/threat_model.md](docs/threat_model.md)
 ## Quick Start
 
 ```bash
-git clone https://github.com/joelnishanth/offlyn-verify-core.git
+git clone https://github.com/rahulraonatarajan/offlyn-verify-core.git
 cd offlyn-verify-core/prototype
 python -m venv .venv
 source .venv/bin/activate
@@ -209,6 +209,23 @@ Expected result:
 - [Evaluation Plan](docs/evaluation_plan.md)
 - [Hardware Mapping](docs/hardware_mapping.md)
 
+## Relationship to SilicaFold
+
+[SilicaFold](https://github.com/offlyn-ai/silicafold-offlyn.ai-chip) is a narrow hardware-backed evidence artifact that demonstrates a TinyTapeout-scale policy-gate primitive for structured agent actions.
+
+**Key distinction**:
+
+- **SilicaFold** is the narrow hardware evidence — a deterministic policy decision primitive in RTL
+- **VerifyCore** is the broader architecture — signed policies, context attestation, authenticated channels, audit integrity, and human-in-the-loop escalation
+
+SilicaFold provides hardware-backed evidence that a policy-at-actuation-boundary decision primitive can be represented in RTL, validated with reproducible tests, and prepared for open silicon workflows. It does not implement the full VerifyCore enforcement stack.
+
+For more details, see:
+
+- [SilicaFold Reference Strategy](docs/silicafold_reference_strategy.md)
+- [VerifyCore Claims Matrix](docs/verifycore_claims_matrix.md)
+- [Patent/Publication Sequence](docs/patent_publication_sequence.md)
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
@@ -217,8 +234,9 @@ MIT — see [LICENSE](LICENSE).
 
 ```bibtex
 @software{offlyn_verify_core_2026,
+  author = {Natarajan, Rahul and Reddy, Joel Nishanth},
   title  = {Offlyn Verify Core: Policy at the Actuation Boundary},
   year   = {2026},
-  url    = {https://github.com/joelnishanth/offlyn-verify-core}
+  url    = {https://github.com/rahulraonatarajan/offlyn-verify-core}
 }
 ```
