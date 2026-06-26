@@ -3,13 +3,13 @@ title: "Offlyn Verify Core: Policy at the Actuation Boundary"
 message: "If you use this software, please cite it as below."
 type: software
 authors:
+  - given-names: Joel Nishanth
+    family-names: Ponukumatla
+    affiliation: Offlyn.ai
   - given-names: Rahul
     family-names: Natarajan
     affiliation: Offlyn.ai
-  - given-names: Joel Nishanth
-    family-names: Reddy
-    affiliation: Offlyn.ai
-repository-code: "https://github.com/rahulraonatarajan/offlyn-verify-core"
+repository-code: "https://github.com/joelnishanth/offlyn-verify-core"
 license: MIT
 version: "0.1.0"
 date-released: "2026-06-17"

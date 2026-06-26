@@ -11,7 +11,7 @@ SilicaFold should be published first as a narrow, hardware-backed TinyTapeout / 
 | Repository | Purpose | URL |
 |------------|---------|-----|
 | SilicaFold | Hardware primitive / evidence artifact | https://github.com/offlyn-ai/silicafold-offlyn.ai-chip |
-| VerifyCore | Broader policy-at-actuation-boundary architecture | https://github.com/rahulraonatarajan/offlyn-verify-core |
+| VerifyCore | Broader policy-at-actuation-boundary architecture | https://github.com/joelnishanth/offlyn-verify-core |
 
 Key relationship:
 
@@ -84,7 +84,7 @@ When citing in BibTeX:
 
 ```bibtex
 @misc{silicafold2026,
-  author = {Natarajan, Rahul and Reddy, Joel Nishanth},
+  author = {Ponukumatla, Joel Nishanth and Natarajan, Rahul},
   title = {SilicaFold: A TinyTapeout Hardware Primitive for Policy-Gated Offline AI Actuation},
   year = {2026},
   note = {Draft / forthcoming hardware-backed data paper, Offlyn.ai},
