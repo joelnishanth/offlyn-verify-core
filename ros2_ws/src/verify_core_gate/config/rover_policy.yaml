@@ -1,0 +1,43 @@
+# Verify Core rover policy for Phase 1 demo
+# Defines speed limits per zone and enforcement rules
+
+policy_id: rover_policy_v1
+policy_epoch: 1
+robot_id: rover-01
+
+speed_limits:
+  normal: 1.0
+  human_zone: 0.2
+  loading_dock: 0.1
+  restricted: 0.0
+
+angular_speed_limit: 2.0
+
+zone_rules:
+  restricted:
+    entry_allowed: false
+    reason: "Restricted zone - entry forbidden"
+
+  human_zone:
+    entry_allowed: true
+    human_nearby_speed_limit: 0.1
+    reason: "Human zone - reduced speed required"
+
+  loading_dock:
+    entry_allowed: true
+    reason: "Loading dock - low speed only"
+
+  normal:
+    entry_allowed: true
+    reason: "Normal operating area"
+
+allowed_actions:
+  - move
+  - stop
+  - turn
+  - emergency_stop
+
+allowed_sources:
+  - autonomy_planner
+  - teleop
+  - safety_monitor

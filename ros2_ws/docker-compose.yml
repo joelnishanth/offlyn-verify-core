@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  ros2-sim:
+    build:
+      context: ..
+      dockerfile: ros2_ws/Dockerfile
+    container_name: verify_core_ros2
+    environment:
+      - DISPLAY=${DISPLAY:-}
+      - ROS_DOMAIN_ID=42
+    volumes:
+      - ./src:/ros2_ws/src
+      - ../prototype:/prototype
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    network_mode: host
+    command: >
+      bash -c "
+        source /opt/ros/jazzy/setup.bash &&
+        source /ros2_ws/install/setup.bash &&
+        ros2 launch verify_core_gate gate.launch.py
+      "
+
+  autonomy-planner:
+    build:
+      context: ..
+      dockerfile: ros2_ws/Dockerfile
+    container_name: verify_core_planner
+    environment:
+      - ROS_DOMAIN_ID=42
+    volumes:
+      - ./src:/ros2_ws/src
+      - ../prototype:/prototype
+    network_mode: host
+    depends_on:
+      - ros2-sim
+    command: >
+      bash -c "
+        sleep 3 &&
+        source /opt/ros/jazzy/setup.bash &&
+        source /ros2_ws/install/setup.bash &&
+        ros2 run rover_sim autonomy_planner
+      "

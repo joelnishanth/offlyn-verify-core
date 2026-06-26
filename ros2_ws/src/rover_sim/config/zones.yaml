@@ -1,0 +1,44 @@
+# Zone definitions for Offlyn Verify Core rover demo
+# Each zone defines rectangular boundaries in the map frame (meters)
+# Policy evaluation uses these boundaries for geofence enforcement
+
+zones:
+  normal:
+    description: "Standard operating area - full speed allowed"
+    bounds:
+      x_min: -5.0
+      x_max: 5.0
+      y_min: -5.0
+      y_max: 5.0
+    max_speed: 1.0
+    human_speed_limit: 0.3
+
+  restricted:
+    description: "Entry forbidden - all actions denied"
+    bounds:
+      x_min: 2.0
+      x_max: 4.0
+      y_min: 2.0
+      y_max: 4.0
+    max_speed: 0.0
+    entry_allowed: false
+
+  human_zone:
+    description: "Human-occupied area - reduced speed enforced"
+    bounds:
+      x_min: -4.0
+      x_max: -2.0
+      y_min: -1.0
+      y_max: 1.0
+    max_speed: 0.2
+    human_speed_limit: 0.1
+
+  loading_dock:
+    description: "Loading/unloading area - low speed only"
+    bounds:
+      x_min: -1.0
+      x_max: 1.0
+      y_min: -4.0
+      y_max: -2.0
+    max_speed: 0.1
+    human_speed_limit: 0.05

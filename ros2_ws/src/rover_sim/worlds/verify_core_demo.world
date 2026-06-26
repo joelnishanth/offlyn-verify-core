@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="verify_core_demo">
+    <!-- Ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Sun -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- Normal operating area walls -->
+    <model name="wall_north">
+      <static>true</static>
+      <pose>0 5 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_south">
+      <static>true</static>
+      <pose>0 -5 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>10 0.1 1</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_east">
+      <static>true</static>
+      <pose>5 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_west">
+      <static>true</static>
+      <pose>-5 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.1 10 1</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- RESTRICTED ZONE marker (red floor area: x=2..4, y=2..4) -->
+    <model name="restricted_zone">
+      <static>true</static>
+      <pose>3 3 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>2 2 0.002</size></box></geometry>
+          <material>
+            <ambient>0.9 0.1 0.1 0.6</ambient>
+            <diffuse>0.9 0.1 0.1 0.6</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- HUMAN ZONE marker (yellow floor area: x=-4..-2, y=-1..1) -->
+    <model name="human_zone">
+      <static>true</static>
+      <pose>-3 0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>2 2 0.002</size></box></geometry>
+          <material>
+            <ambient>0.9 0.9 0.1 0.6</ambient>
+            <diffuse>0.9 0.9 0.1 0.6</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- LOADING DOCK marker (green floor area: x=-1..1, y=-4..-2) -->
+    <model name="loading_dock">
+      <static>true</static>
+      <pose>0 -3 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>2 2 0.002</size></box></geometry>
+          <material>
+            <ambient>0.1 0.8 0.2 0.6</ambient>
+            <diffuse>0.1 0.8 0.2 0.6</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
