@@ -1,0 +1,6 @@
+{
+  "robot_id": "rover-01",
+  "action": "move",
+  "angular_z": 0.0,
+  "source": "autonomy_planner"
+}

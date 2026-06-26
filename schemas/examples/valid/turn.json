@@ -1,0 +1,9 @@
+{
+  "robot_id": "rover-01",
+  "mission_id": "mission-demo-002",
+  "action": "turn",
+  "angular_z": 0.5,
+  "zone": "normal",
+  "human_nearby": false,
+  "source": "autonomy_planner"
+}

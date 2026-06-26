@@ -1,0 +1,5 @@
+{
+  "robot_id": "rover-01",
+  "action": "emergency_stop",
+  "source": "safety_monitor"
+}

@@ -1,0 +1,6 @@
+{
+  "action": "move",
+  "linear_x": 0.4,
+  "angular_z": 0.0,
+  "source": "autonomy_planner"
+}
