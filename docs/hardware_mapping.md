@@ -85,8 +85,8 @@ Map the gate logic to fixed-function silicon:
 | Stage | Status | Tracked In |
 |---|---|---|
 | Stage 0: Software simulation | **Complete** | This repository |
-| Stage 1: TPM-backed signing | Planned | [Issue #3](https://github.com/joelnishanth/offlyn-verify-core/issues/3), [Issue #11](https://github.com/joelnishanth/offlyn-verify-core/issues/11) |
-| Stage 2: Microcontroller gate | Planned | [Issue #2](https://github.com/joelnishanth/offlyn-verify-core/issues/2), [Issue #10](https://github.com/joelnishanth/offlyn-verify-core/issues/10) |
+| Stage 1: TPM-backed signing | Planned | See SilicaFold for hardware evidence path |
+| Stage 2: Microcontroller gate | Planned | See SilicaFold for hardware evidence path |
 | Stage 3: FPGA implementation | Future | — |
 | Stage 4: ASIC primitive | Future | — |
 
