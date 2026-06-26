@@ -1,6 +1,9 @@
 {
+  "_reason": "Action type not in allowed enum",
+  "_expected_error": "action must be one of: move, stop, turn, emergency_stop",
   "robot_id": "rover-01",
   "action": "fly",
-  "linear_x": 0.4,
-  "source": "autonomy_planner"
+  "source": "autonomy_planner",
+  "linear_x": 1.0,
+  "zone": "normal"
 }

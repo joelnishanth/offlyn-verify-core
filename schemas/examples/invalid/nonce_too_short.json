@@ -1,0 +1,8 @@
+{
+  "_reason": "Nonce must be at least 8 characters for replay protection",
+  "_expected_error": "nonce must have minLength of 8",
+  "robot_id": "rover-01",
+  "action": "stop",
+  "source": "autonomy_planner",
+  "nonce": "abc"
+}

@@ -1,0 +1,12 @@
+{
+  "_reason": "Additional properties not allowed (strict schema)",
+  "_expected_error": "Additional properties are not allowed (payload, secret_override)",
+  "robot_id": "rover-01",
+  "action": "move",
+  "source": "autonomy_planner",
+  "linear_x": 0.5,
+  "zone": "normal",
+  "nonce": "extra-field-12345",
+  "payload": "inject_this",
+  "secret_override": true
+}

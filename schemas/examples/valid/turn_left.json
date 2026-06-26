@@ -1,0 +1,11 @@
+{
+  "robot_id": "rover-01",
+  "action": "turn",
+  "source": "autonomy_planner",
+  "angular_z": 1.0,
+  "zone": "normal",
+  "human_nearby": false,
+  "mission_id": "mission-demo-001",
+  "nonce": "turn-001-abc12345",
+  "policy_epoch": 1
+}

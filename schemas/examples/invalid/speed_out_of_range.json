@@ -1,7 +1,10 @@
 {
+  "_reason": "linear_x exceeds maximum allowed value (10.0 m/s)",
+  "_expected_error": "linear_x must be <= 10.0",
   "robot_id": "rover-01",
   "action": "move",
-  "linear_x": 5.0,
-  "angular_z": 0.0,
-  "source": "autonomy_planner"
+  "source": "autonomy_planner",
+  "linear_x": 15.0,
+  "zone": "normal",
+  "nonce": "too-fast-12345678"
 }

@@ -1,0 +1,10 @@
+{
+  "_reason": "Zone value not in allowed enum",
+  "_expected_error": "zone must be one of: normal, restricted, human_zone, loading_dock",
+  "robot_id": "rover-01",
+  "action": "move",
+  "source": "autonomy_planner",
+  "linear_x": 0.3,
+  "zone": "secret_tunnel",
+  "nonce": "badzone-12345678"
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://offlyn.ai/schemas/robotics-action/v1",
+  "title": "Offlyn Verify Core — Robotics Action Request",
+  "description": "Structured robot action format submitted by the autonomy layer for policy evaluation before actuation.",
+  "type": "object",
+  "required": ["robot_id", "action", "source"],
+  "properties": {
+    "robot_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for the robot submitting the action."
+    },
+    "action": {
+      "type": "string",
+      "enum": ["move", "stop", "turn", "emergency_stop"],
+      "description": "The commanded action type."
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identity of the component proposing the action (e.g. autonomy_planner, teleop)."
+    },
+    "linear_x": {
+      "type": "number",
+      "minimum": -10.0,
+      "maximum": 10.0,
+      "description": "Forward/backward velocity in m/s. Required for move actions."
+    },
+    "angular_z": {
+      "type": "number",
+      "minimum": -6.28,
+      "maximum": 6.28,
+      "description": "Rotational velocity in rad/s. Required for turn actions."
+    },
+    "zone": {
+      "type": "string",
+      "enum": ["normal", "restricted", "human_zone", "loading_dock"],
+      "default": "normal",
+      "description": "Current zone the robot occupies or intends to enter."
+    },
+    "human_nearby": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a human has been detected within the safety perimeter."
+    },
+    "mission_id": {
+      "type": "string",
+      "description": "Optional mission or task identifier for traceability."
+    },
+    "position": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number", "description": "X coordinate in meters (map frame)." },
+        "y": { "type": "number", "description": "Y coordinate in meters (map frame)." },
+        "heading": { "type": "number", "description": "Heading in radians [-pi, pi]." }
+      },
+      "description": "Current estimated robot position. Used for zone boundary checks."
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Unix epoch timestamp when the action was proposed."
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 8,
+      "description": "Unique request identifier for replay protection."
+    },
+    "policy_epoch": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Expected policy epoch. Gate rejects requests with mismatched epochs."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "action": { "const": "move" } } },
+      "then": { "required": ["linear_x"] }
+    },
+    {
+      "if": { "properties": { "action": { "const": "turn" } } },
+      "then": { "required": ["angular_z"] }
+    }
+  ],
+  "additionalProperties": false
+}

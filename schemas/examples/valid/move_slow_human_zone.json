@@ -1,0 +1,13 @@
+{
+  "robot_id": "rover-02",
+  "action": "move",
+  "source": "teleop",
+  "linear_x": 0.1,
+  "angular_z": 0.0,
+  "zone": "human_zone",
+  "human_nearby": true,
+  "mission_id": "patrol-route-7",
+  "position": { "x": 5.0, "y": 3.2, "heading": 1.57 },
+  "nonce": "slow-004-human123",
+  "policy_epoch": 1
+}

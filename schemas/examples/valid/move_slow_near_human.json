@@ -1,9 +1,0 @@
-{
-  "robot_id": "rover-01",
-  "action": "move",
-  "linear_x": 0.1,
-  "angular_z": 0.0,
-  "zone": "human_zone",
-  "human_nearby": true,
-  "source": "autonomy_planner"
-}

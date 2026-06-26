@@ -1,6 +1,8 @@
 {
+  "_reason": "Missing required field: source",
+  "_expected_error": "source is a required property",
   "robot_id": "rover-01",
   "action": "move",
-  "linear_x": 0.4,
-  "angular_z": 0.0
+  "linear_x": 0.3,
+  "zone": "normal"
 }

@@ -1,0 +1,12 @@
+{
+  "robot_id": "rover-01",
+  "action": "move",
+  "source": "autonomy_planner",
+  "linear_x": 0.05,
+  "angular_z": 0.0,
+  "zone": "loading_dock",
+  "human_nearby": false,
+  "mission_id": "delivery-pickup-042",
+  "nonce": "dock-005-load4567",
+  "policy_epoch": 1
+}

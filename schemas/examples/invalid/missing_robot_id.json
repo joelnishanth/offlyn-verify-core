@@ -1,6 +1,8 @@
 {
+  "_reason": "Missing required field: robot_id",
+  "_expected_error": "robot_id is a required property",
   "action": "move",
-  "linear_x": 0.4,
-  "angular_z": 0.0,
-  "source": "autonomy_planner"
+  "source": "autonomy_planner",
+  "linear_x": 0.5,
+  "zone": "normal"
 }

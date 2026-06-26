@@ -1,5 +1,9 @@
 {
   "robot_id": "rover-01",
   "action": "emergency_stop",
-  "source": "safety_monitor"
+  "source": "safety_monitor",
+  "human_nearby": true,
+  "zone": "human_zone",
+  "nonce": "estop-003-emer9999",
+  "policy_epoch": 1
 }

@@ -1,6 +1,9 @@
 {
+  "_reason": "Action 'move' requires linear_x field",
+  "_expected_error": "linear_x is required when action is move",
   "robot_id": "rover-01",
   "action": "move",
-  "angular_z": 0.0,
-  "source": "autonomy_planner"
+  "source": "autonomy_planner",
+  "zone": "normal",
+  "nonce": "bad-move-no-vel-01"
 }

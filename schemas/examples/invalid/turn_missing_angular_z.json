@@ -1,5 +1,0 @@
-{
-  "robot_id": "rover-01",
-  "action": "turn",
-  "source": "autonomy_planner"
-}

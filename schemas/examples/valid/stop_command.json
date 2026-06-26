@@ -1,0 +1,9 @@
+{
+  "robot_id": "rover-01",
+  "action": "stop",
+  "source": "autonomy_planner",
+  "zone": "normal",
+  "human_nearby": false,
+  "nonce": "stop-002-xyz98765",
+  "policy_epoch": 1
+}
