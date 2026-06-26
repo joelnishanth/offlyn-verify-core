@@ -198,9 +198,45 @@ python -m planner.scenarios --scenario all
 
 Expected result:
 
-- All 23 tests pass.
+- All 81 tests pass.
 - Safe movement is allowed.
 - Unsafe speed, angle, geofence, human proximity, unsigned policy, rollback, replay, and direct actuator bypass scenarios fail closed.
+
+## Phase 1 — Robotics MVP
+
+The project now includes a **ROS 2 integration** proving that a robot cannot actuate unless Verify Core allows the action.
+
+**Architecture**:
+
+```
+/proposed_action                    /cmd_vel
+     │                                  │
+     ▼                                  ▼
+┌────────────┐    ┌──────────────┐    ┌────────────┐
+│ Autonomy   │───▶│ Verify Core  │───▶│   Rover    │
+│ Planner    │    │ Gate Node    │    │ Actuators  │
+└────────────┘    └──────────────┘    └────────────┘
+                         │
+                         ▼
+                  ┌──────────────┐
+                  │  Audit Log   │
+                  └──────────────┘
+```
+
+**Key enforcement**: Denied actions **never reach /cmd_vel**. The gate evaluates speed limits, restricted zones, and human-proximity policy before publishing approved commands.
+
+```bash
+# Run policy tests (no ROS 2 required)
+cd prototype && pytest -v     # 81 tests pass
+
+# Run full demo (Docker)
+cd ros2_ws && docker compose up --build
+```
+
+- [Phase 1 Demo Script](docs/phase1_demo.md)
+- [ROS 2 Workspace README](ros2_ws/README.md)
+- [Action Schema](schemas/README.md)
+- [Robotics Roadmap](docs/ROADMAP.md)
 
 ## Documentation
 
